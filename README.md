@@ -26,8 +26,8 @@ first, then share a Vercel link.
 | 1 | Address -> property facts (`src/lib/server/property.js`), works in Hornsby | done |
 | 2 | Rank NSW DCPs by image share | done, then superseded: Danny chose Hornsby |
 | 3 | Hornsby DCP 2024 + PixelRAG 10-page test on CPU | done, see below |
-| 4 | Index all 489 pages on a free Colab GPU (`notebooks/hornsby_index_colab.ipynb`; 10-page GPU test matched the CPU index) | in progress |
-| 5 | Chat brain: facts + retrieved page images -> answer citing clause and page (`src/lib/server/chat.js`, try it with `scripts/ask.js`) | done as a CLI, tested on the 10-page index |
+| 4 | Index all 489 pages on a free Colab GPU (`notebooks/hornsby_index_colab.ipynb`) | done: 1,956 vectors, 16 MB (`data/hornsby/index_full`) |
+| 5 | Chat brain: facts + retrieved page images -> answer citing clause and page (`src/lib/server/chat.js`, try it with `scripts/ask.js`) | done as a CLI, tested on the full index |
 | 6 | Chat UI | |
 | 7 | Deploy, send Danny a link | |
 
@@ -71,6 +71,35 @@ unknown facts (service down, or no state data) are shown as NOT KNOWN / NOT COVE
 
 Ideas noted for later: the NSW planning services include a tree-canopy layer, which could give the model a real "trees on this lot"
 fact for Danny's "there is a tree on the lot" example; the search score floor (0.30) still needs calibrating on the full index.
+
+## Full 489-page index: retrieval results
+
+Built on a free Colab T4 (`--device auto`, base model, fp16). The 10-page GPU index gave the same rankings as the CPU index
+(scores within 0.001). Checked with `node scripts/eval_retrieval.js` (11 real questions whose right pages come from the PDF's
+bookmarks and Danny's meeting, plus 5 nonsense questions; answer key in `test/retrieval_questions.json`):
+
+| | Result |
+|---|---|
+| Right page is the top result | 7 of 11 |
+| Right page in the top 3 / top 5 / top 10 | 9 / 11 / 11 of 11 |
+| Best score for real questions | 0.446 - 0.576 |
+| Best score for nonsense ("how do I bake bread" ...) | 0.296 - 0.351 |
+
+- The "nothing relevant" score floor moved from 0.30 (tuned on 10 pages, where nonsense scored 0.23) to **0.40**: with 489 pages
+  nonsense scores higher, and 0.30 would have let it through. Small sample; re-run the evaluation when the index or model changes.
+- Weak spots: "cut down a tree" only reaches the main clause page (p17) by rank 5 in a raw search, because 234 pages mention
+  trees; the chat recovers because the model rephrases and searches several times. (Hybrid search over the PDF text layer would likely fix this
+  but would no longer be a pure image test.)
+- One apparent miss was my labelling error: for the townhouse question the answer key listed only the precinct map (p111), but
+  pages 124-125 (section 3.2 Medium Density Housing, "town houses") are equally valid. The key was corrected after inspection and says so.
+
+Live answers on the full index (`scripts/ask.js`, 16 Dural Street, Hornsby, R4):
+- Tree removal: cites p17 clause 1.2.6.1(a)-(c), p18 exemptions (d)-(e), p19 Table 1.2.6-b (Tree Permit); "probably yes" and lists what
+  it cannot know. 60k tokens.
+- "Can I build townhouses on this lot?": notices the DCP ties its townhouse section 3.2 to the **R3** zone (p15, Table 1.2.1-b, checked against
+  the page) while this lot is R4, says permissibility is an LEP question it has no data for, and refuses a definite yes. Before the
+  search cap it ran 9 searches and 150k tokens; with `MAX_SEARCHES = 4` it uses 35k (about $0.05-0.10) with the same conclusion, slightly less detail.
+- Cost reference: OpenAI's usage page showed $0.14 for the first two 10-page-index questions.
 
 ## Phase 2 (superseded by the meeting): which DCP? (measured, not guessed)
 
@@ -150,7 +179,7 @@ PixelRAG runs in WSL2 Ubuntu (Python 3.12 venv, pinned in `requirements-wsl.txt`
 
 ```
 src/lib/server/   address.js  arcgis.js  geo.js  property.js  property-cache.js  db.js  chat.js  dcp_search.js
-scripts/          ask.js  pixelrag_sample.sh  pixelrag_serve.sh  pixelrag_query.js
+scripts/          ask.js  eval_retrieval.js  pixelrag_sample.sh  pixelrag_serve.sh  pixelrag_query.js
                   try_address.js  find_addresses.js  record_fixtures.js  list_flood_lgas.js
                   collect_dcp_register.js  rank_dcps.js  pdf_stats.py  inspect_pdf.py  lib/(score, dcp_index, wsl)
 sql/              01_schema.sql   (dcp, dcp_page, property_facts)

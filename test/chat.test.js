@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { answerQuestion, describeFacts, citedPageNumbers, TOOLS, SYSTEM_PROMPT, MAX_ROUNDS } from '../src/lib/server/chat.js';
+import { answerQuestion, describeFacts, citedPageNumbers, TOOLS, SYSTEM_PROMPT, MAX_ROUNDS, MAX_SEARCHES } from '../src/lib/server/chat.js';
 
 // A real-shaped facts bundle (what property.js returns) for a Hornsby lot
 const FACTS = {
@@ -197,6 +197,23 @@ describe('the search tool loop', () => {
 	});
 
 	it('the default cap is 5, as in the order agent', () => expect(MAX_ROUNDS).toBe(5));
+
+	it('caps the TOTAL number of searches even when one round holds several parallel calls', async () => {
+		const three = { id: 'r1', output: ['a', 'b', 'c'].map((q, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: q }) })) };
+		const ai = fakeOpenAI(three, finalResp('done'));
+		const search = fakeSearch();
+		const r = await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai, search, { maxSearches: 2 }));
+		expect(search.seen).toEqual(['a', 'b']); // the third never runs
+		const outs = ai.calls[1].input.filter((i) => i.type === 'function_call_output').map((o) => JSON.parse(o.output));
+		expect(outs).toHaveLength(3);
+		expect(outs[2].error).toMatch(/search limit reached \(2 per question\)/);
+		expect(r.toolCalls).toHaveLength(2);
+	});
+
+	it('the default search cap is 4 and the model is told', () => {
+		expect(MAX_SEARCHES).toBe(4);
+		expect(SYSTEM_PROMPT).toMatch(/at most four searches/);
+	});
 
 	it('a follow-up continues the conversation and does not resend the facts', async () => {
 		const ai = fakeOpenAI(finalResp('follow-up answer'));

@@ -23,22 +23,22 @@ describe('pageOf', () => {
 
 describe('searchPages', () => {
 	it('collapses chunk hits to pages: best chunk wins, sorted by score', async () => {
-		const r = await searchPages('q', { fetch: fakeFetch([hit(17, 0.41, 0), hit(33, 0.35, 2), hit(17, 0.44, 3), hit(37, 0.5, 1)]) });
-		expect(r.pages.map((p) => [p.page, p.score, p.chunk])).toEqual([[37, 0.5, 1], [17, 0.44, 3], [33, 0.35, 2]]);
+		const r = await searchPages('q', { fetch: fakeFetch([hit(17, 0.46, 0), hit(33, 0.42, 2), hit(17, 0.49, 3), hit(37, 0.55, 1)]) });
+		expect(r.pages.map((p) => [p.page, p.score, p.chunk])).toEqual([[37, 0.55, 1], [17, 0.49, 3], [33, 0.42, 2]]);
 		expect(r.belowFloor).toBe(false);
-		expect(r.best).toBe(0.5);
+		expect(r.best).toBe(0.55);
 	});
 
 	it('drops pages under the score floor, so nonsense returns nothing', async () => {
-		const r = await searchPages('how do I bake bread', { fetch: fakeFetch([hit(209, 0.234), hit(282, 0.226)]) });
+		const r = await searchPages('how do I bake bread', { fetch: fakeFetch([hit(218, 0.351), hit(282, 0.226)]) });
 		expect(r.pages).toEqual([]);
 		expect(r.belowFloor).toBe(true);
-		expect(r.best).toBe(0.234); // still reported, so a caller can log how close it was
+		expect(r.best).toBe(0.351); // still reported, so a caller can log how close it was
 	});
 
-	it('the floor default keeps every real question and drops the nonsense one measured on the 10-page index', () => {
-		expect(DEFAULTS.floor).toBeGreaterThan(0.234);
-		expect(DEFAULTS.floor).toBeLessThan(0.389);
+	it('the floor sits between the best nonsense score (0.351) and the weakest real question (0.446) on the full index', () => {
+		expect(DEFAULTS.floor).toBeGreaterThan(0.351);
+		expect(DEFAULTS.floor).toBeLessThan(0.446);
 	});
 
 	it('caps the number of pages returned', async () => {

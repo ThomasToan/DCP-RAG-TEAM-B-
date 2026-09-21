@@ -12,10 +12,12 @@ import { join } from 'node:path';
 export const DEFAULTS = {
 	url: 'http://127.0.0.1:30001',
 	/**
-	 * Scores below this are treated as "the DCP has nothing on this". PROVISIONAL: measured on a 10-page index, where
-	 * real questions scored 0.39-0.57 and "how do I bake bread" scored 0.23. Re-calibrate on the full 489-page index.
+	 * Scores below this are treated as "the DCP has nothing on this". Calibrated on the FULL 489-page index with
+	 * `node scripts/eval_retrieval.js`: the best score for 5 nonsense questions was 0.296-0.351 and for 11 real questions
+	 * 0.446-0.576. (On the 10-page index nonsense scored only 0.23, so a floor tuned there, 0.30, let nonsense through.)
+	 * Small sample: re-run the evaluation whenever the index or the model changes.
 	 */
-	floor: 0.3,
+	floor: 0.4,
 	chunksToFetch: 12,
 	topPages: 4,
 	pagesDir: 'data/hornsby/pages'

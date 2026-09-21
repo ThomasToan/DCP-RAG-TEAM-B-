@@ -1,0 +1,23 @@
+{
+	"note": "Ground truth for PixelRAG retrieval on Hornsby DCP 2024 (489 pages). Expected PDF pages come from the PDF's own bookmarks (scripts/inspect_pdf.py, section start..end) and from the pages in Danny's meeting. A question counts as found if ANY expected page is returned. These are retrieval checks, not answer-quality tests: Danny's planners supply those.",
+	"relevant": [
+		{ "q": "how many car parking spaces per dwelling are allowed in the Hornsby town centre", "expect": [37], "source": "Danny's meeting: Figure 1.3-b + Table 1.3.2-d" },
+		{ "q": "can I remove or cut down a tree on my property", "expect": [17, 18, 19, 20], "source": "bookmark 1.2.6.1 Tree Preservation" },
+		{ "q": "where can townhouses or high density residential development be built", "expect": [111, 124, 125], "source": "Figure 3-a Housing Strategy Precincts map (p111) and section 3.2 Medium Density Housing, whose notes say it covers town houses (p124-125). CORRECTED after first run: the answer key originally listed only p111, and the search returned p124/p125, which are equally valid" },
+		{ "q": "what bushfire requirements apply to development on bushfire prone land", "expect": [57], "source": "bookmark 1.3.3.1 Bushfire" },
+		{ "q": "how must stormwater be managed on a development site", "expect": [26, 27], "source": "bookmark 1.3.1.2 Stormwater Management" },
+		{ "q": "what are the waste management requirements for a development", "expect": [43, 44, 45], "source": "bookmark 1.3.2.3 Waste Management" },
+		{ "q": "rules for putting up a business sign", "expect": [53, 54, 55], "source": "bookmark 1.3.2.11 Signage" },
+		{ "q": "what setbacks apply to buildings in the business zone", "expect": [218, 219, 220, 221, 222, 223, 250, 251, 288], "source": "bookmarks 4.2.2 / 4.4.5 / 4.5.5.5 Setbacks" },
+		{ "q": "can I build a secondary dwelling on a heritage item", "expect": [424, 429], "source": "bookmarks 9.4.23 / 9.5.5 Secondary Dwellings" },
+		{ "q": "swimming pool on a heritage listed property", "expect": [423], "source": "bookmark 9.4.17 Swimming Pools" },
+		{ "q": "fence or gate on a heritage item", "expect": [422, 428, 436], "source": "bookmarks 9.4.15 / 9.5.4 / 9.6.16 Fencing and Gates" }
+	],
+	"irrelevant": [
+		{ "q": "how do I bake bread" },
+		{ "q": "what is the capital of France" },
+		{ "q": "best pizza restaurant in Sydney" },
+		{ "q": "how to change a flat car tyre" },
+		{ "q": "who won the football match last night" }
+	]
+}

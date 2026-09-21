@@ -11,13 +11,15 @@ import { searchPages, loadPageImage } from './dcp_search.js';
 export const DCP_NAME = 'Hornsby Development Control Plan 2024';
 export const DCP_LGA = 'HORNSBY';
 export const MAX_ROUNDS = 5;
+/** Hard cap on searches per question. Rounds alone are not enough: one round can hold several parallel searches (a live question ran 9 and cost 150k tokens). */
+export const MAX_SEARCHES = 4;
 
 export const SYSTEM_PROMPT = `You are a planning-rules assistant for ${DCP_NAME} (Hornsby Shire Council, book version updated 26 June 2026).
 
 You are given verified FACTS about one property (zone, lot size, overlays) and a QUESTION about it. Your job is to say what the DCP requires for that property, and cite where.
 
 Rules:
-- Use only two sources: the property facts you were given, and the DCP page images that the search_dcp tool returns. Call search_dcp (up to a few times, with different plain-words queries) before answering any question about what is allowed.
+- Use only two sources: the property facts you were given, and the DCP page images that the search_dcp tool returns. Call search_dcp before answering any question about what is allowed. You may run at most four searches in total, so choose a few well-aimed plain-words queries rather than many near-duplicates; if the pages already shown do not contain the answer, say so.
 - Cite every rule as: PDF page N, plus the clause or table number printed on that page (for example "PDF page 37, Table 1.3.2-d"). Use the PDF page numbers you are given with each image, not the printed page numbers.
 - If the returned pages do not contain the answer, say so plainly and say what you could not find. Never invent a clause number, figure, or rate.
 - Facts marked NOT KNOWN or NOT COVERED are genuinely unknown: say the answer depends on them. Do not assume "no".
@@ -88,7 +90,7 @@ const asText = (s) => ({ type: 'input_text', text: s });
  * @param {{ openai: any, model: string, search?: typeof searchPages, loadImage?: typeof loadPageImage, searchOpts?: object, maxRounds?: number }} deps
  */
 export async function answerQuestion({ facts, question, previousResponseId = null }, deps) {
-	const { openai, model, search = searchPages, loadImage = loadPageImage, searchOpts = {}, maxRounds = MAX_ROUNDS } = deps;
+	const { openai, model, search = searchPages, loadImage = loadPageImage, searchOpts = {}, maxRounds = MAX_ROUNDS, maxSearches = MAX_SEARCHES } = deps;
 
 	// Scope guard BEFORE any model call: this DCP only covers Hornsby.
 	if (String(facts?.lga ?? '').toUpperCase() !== DCP_LGA) {
@@ -147,6 +149,10 @@ export async function answerQuestion({ facts, question, previousResponseId = nul
 				query = String(JSON.parse(call.arguments ?? '{}').query ?? '').trim();
 			} catch {
 				/* fall through to the validation below */
+			}
+			if (toolCalls.length >= maxSearches) {
+				input.push({ type: 'function_call_output', call_id: call.call_id, output: JSON.stringify({ error: `search limit reached (${maxSearches} per question). Answer now from the pages already shown, and say what you could not find.` }) });
+				continue;
 			}
 			if (!query || query.length > 300) {
 				input.push({ type: 'function_call_output', call_id: call.call_id, output: JSON.stringify({ error: 'query must be a non-empty string of at most 300 characters' }) });

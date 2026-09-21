@@ -39,4 +39,4 @@ for (const t of r.toolCalls) console.log(`  "${t.query}" -> pages ${t.pages.join
 console.log('\n--- answer ---\n' + r.answer);
 if (r.pages.length) console.log('\nretrieved pages: ' + r.pages.map((p) => `${p.page} (${p.score.toFixed(2)})`).join(', '));
 if (r.warnings.length) console.log('WARNINGS: ' + r.warnings.join(' | '));
-if (r.usage) console.log(`\n(${((Date.now() - t0) / 1000).toFixed(1)} s, tokens in/out: ${r.usage.input_tokens}/${r.usage.output_tokens}, model ${model})`);
+if (r.usage) console.log(`\n(${((Date.now() - t0) / 1000).toFixed(1)} s, ${r.usage.requests} model requests, tokens in/out TOTAL: ${r.usage.input_tokens}/${r.usage.output_tokens}, model ${model})`);
