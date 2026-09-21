@@ -2,7 +2,10 @@
 # Recreate: python3 -m venv ~/dcp-venv && source ~/dcp-venv/bin/activate
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 #   pip install -r requirements-wsl.txt
-pixelrag[index]==0.4.0
+#   pip install --force-reinstall --no-deps torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
+# The last line matters: pixelrag pulls torchvision from PyPI, which does not match the CPU torch build and fails at
+# embed time with "operator torchvision::nms does not exist". Found while running the first real index (Hornsby).
+pixelrag[index,serve]==0.4.0
 markitdown[pdf]==0.1.7
 pymupdf==1.28.2
 # resolved transitive versions worth recording in the README

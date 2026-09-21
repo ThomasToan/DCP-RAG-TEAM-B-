@@ -16,20 +16,46 @@ when is the image path worth its cost, and how can we tell from the PDF alone?**
 
 ## Status
 
-| Phase | | State |
+The 2026-09-21 supervisor meeting changed the goal: use the **Hornsby** DCP, and build a **chat** that answers "can I build X at
+this address?" with reasons and clause numbers, judged later by professional planners (who supply the tests). Get it running
+first, then share a Vercel link.
+
+| Step | | State |
 |---|---|---|
 | 0 | Setup: SvelteKit, Docker Postgres + pgvector, WSL2 PixelRAG environment | done |
-| 1 | Address -> property facts (`src/lib/server/property.js`) | done |
-| 2 | Rank NSW DCPs by image share, pick the LGA | done: Port Macquarie-Hastings |
-| 3 | Hand-built eval set (10 addresses + expected clauses) | next |
-| 4 | Render pages, PixelRAG index, tile -> page map | |
-| 5 | Applicability rules + LLM tagging + SQL filter (no embeddings) | |
-| 6 | Visual rank + score floor | |
-| 7 | UI | |
-| 8 | markitdown text baseline vs image path | |
-| 9 | Write-up | |
+| 1 | Address -> property facts (`src/lib/server/property.js`), works in Hornsby | done |
+| 2 | Rank NSW DCPs by image share | done, then superseded: Danny chose Hornsby |
+| 3 | Hornsby DCP 2024 + PixelRAG 10-page test on CPU | done, see below |
+| 4 | Index all 489 pages (CPU overnight, or a Colab GPU) | next |
+| 5 | Chat brain: facts + retrieved page images -> answer citing clause and page | |
+| 6 | Chat UI | |
+| 7 | Deploy, send Danny a link | |
 
-## Phase 2: which DCP? (measured, not guessed)
+## Hornsby DCP 2024 + PixelRAG: first test
+
+Source: Hornsby Shire Council, "Hornsby Development Control Plan 2024" book version, updated 26 June 2026 (42 MB, 489 pages, 832
+bookmarks). The council site returns 403 to scripts, so the PDF is downloaded by hand into `data/hornsby/raw/hdcp-2024.pdf`.
+Its ten Parts map to page ranges (`scripts/inspect_pdf.py parts`): General p9-59, Rural 60-107, Residential 108-210,
+Business 211-314, Industrial 315-329, Subdivision 330-343, Community 344-364, River Settlements 365-399, Heritage 400-467,
+Annexures 468-489. Danny's "clause 126.1" (trees) is clause **1.2.6.1 Tree Preservation** (p17).
+
+**Image share:** 29% of pages are image-dominated (Danny estimated ~20%): Business 50%, Residential 37%, General only 4%.
+
+**PixelRAG on CPU** (base `Qwen3-VL-Embedding-2B`, float32, no screenshot adapter: the adapter only works on PixelRAG's GPU backend):
+each page becomes 4 chunks; **14.4 s per chunk**, so all 489 pages (1,956 chunks) would take about **7.8 hours**. Model download
+4.27 GB, one time. Queries take under a second. Every chunk maps back to its page and carries its x/y position, so we can cite
+pages and highlight regions. Test index: 10 pages (`data/hornsby/index_sample`).
+
+| Question | Top page | Expected |
+|---|---|---|
+| parking spaces per dwelling, Hornsby town centre | **p37** (0.57, next best 0.50) | p37, Danny's map + Tier 1/2 table |
+| can I remove or cut down a tree | **p17** (0.41, next 0.35) | p17 Tree Preservation |
+| where can townhouses or high density be built | p294, p209, p177, **p111 is 4th** | p111 Housing Strategy Precincts map |
+| how do I bake bread | best score 0.23 | nothing relevant (real questions scored 0.39-0.57) |
+
+Caveats: 10 pages only, so rankings will get harder at 489; the score floor needs calibrating on the full index.
+
+## Phase 2 (superseded by the meeting): which DCP? (measured, not guessed)
 
 **Method.** The NSW Planning Portal register (`/DCP`, a static HTML list, no API) has 561 links; 379 are in-force,
 374 of those are PDFs totalling 5.7 GB. Pass 1 read each file's size with `HEAD` (no download). The shortlist is
@@ -107,7 +133,8 @@ PixelRAG runs in WSL2 Ubuntu (Python 3.12 venv, pinned in `requirements-wsl.txt`
 
 ```
 src/lib/server/   address.js  arcgis.js  geo.js  property.js  property-cache.js  db.js
-scripts/          try_address.js  find_addresses.js  record_fixtures.js  list_flood_lgas.js
+scripts/          pixelrag_sample.sh  pixelrag_serve.sh  pixelrag_query.js
+                  try_address.js  find_addresses.js  record_fixtures.js  list_flood_lgas.js
                   collect_dcp_register.js  rank_dcps.js  pdf_stats.py  inspect_pdf.py  lib/(score, dcp_index, wsl)
 sql/              01_schema.sql   (dcp, dcp_page, property_facts)
 test/             unit tests + recorded ArcGIS fixtures
