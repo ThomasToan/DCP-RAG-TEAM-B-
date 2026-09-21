@@ -5,7 +5,7 @@
     inspect_pdf.py parts  <pdf>                         top-level bookmarks with page ranges (the DCP's Parts)
     inspect_pdf.py find   <pdf> <term>                  which pages contain a word (case-insensitive)
     inspect_pdf.py text   <pdf> <page> [chars]          extracted text of one page (1-based)
-    inspect_pdf.py render <pdf> <out_dir> <dpi> <p>...  PNG of the listed pages (1-based)
+    inspect_pdf.py render <pdf> <out_dir> <dpi> <p>...  PNG of the listed pages (1-based); `all` renders every page
 
 Runs in the WSL venv (PyMuPDF): wsl --cd <project> -- bash scripts/py.sh scripts/inspect_pdf.py ...
 """
@@ -43,7 +43,8 @@ def main(argv):
     elif cmd == "render":
         out_dir, dpi = argv[3], int(argv[4])
         os.makedirs(out_dir, exist_ok=True)
-        for p in argv[5:]:
+        wanted = [str(n) for n in range(1, doc.page_count + 1)] if argv[5:] == ["all"] else argv[5:]
+        for p in wanted:
             out = os.path.join(out_dir, f"p{int(p):04d}.png")
             doc[int(p) - 1].get_pixmap(dpi=dpi).save(out)
             print(out)

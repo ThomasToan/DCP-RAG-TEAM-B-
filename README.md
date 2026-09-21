@@ -26,8 +26,8 @@ first, then share a Vercel link.
 | 1 | Address -> property facts (`src/lib/server/property.js`), works in Hornsby | done |
 | 2 | Rank NSW DCPs by image share | done, then superseded: Danny chose Hornsby |
 | 3 | Hornsby DCP 2024 + PixelRAG 10-page test on CPU | done, see below |
-| 4 | Index all 489 pages (CPU overnight, or a Colab GPU) | next |
-| 5 | Chat brain: facts + retrieved page images -> answer citing clause and page | |
+| 4 | Index all 489 pages on a free Colab GPU (`notebooks/hornsby_index_colab.ipynb`; 10-page GPU test matched the CPU index) | in progress |
+| 5 | Chat brain: facts + retrieved page images -> answer citing clause and page (`src/lib/server/chat.js`, try it with `scripts/ask.js`) | done as a CLI, tested on the 10-page index |
 | 6 | Chat UI | |
 | 7 | Deploy, send Danny a link | |
 
@@ -54,6 +54,23 @@ pages and highlight regions. Test index: 10 pages (`data/hornsby/index_sample`).
 | how do I bake bread | best score 0.23 | nothing relevant (real questions scored 0.39-0.57) |
 
 Caveats: 10 pages only, so rankings will get harder at 489; the score floor needs calibrating on the full index.
+
+## The chat brain (first live results, 10-page index)
+
+`node scripts/ask.js "16 Dural Street, Hornsby" "<question>"` runs the whole chain: address -> property facts (server side) ->
+the model calls one tool, `search_dcp(query)`, which asks PixelRAG for pages -> the page **images** go to the model
+(OpenAI Responses API, `gpt-5.6-terra`) -> an answer that cites PDF page and clause. Safety rules, all unit-tested: the property
+is decided by the server, never by the model; the tool takes only a search phrase; at most 5 search rounds; a property outside
+Hornsby never reaches the model; a page image is sent once; a page number in the answer that was not retrieved is flagged;
+unknown facts (service down, or no state data) are shown as NOT KNOWN / NOT COVERED, never as "no".
+
+| Question | Result |
+|---|---|
+| How many parking spaces for a 2-bedroom apartment? | Found p37 (Danny's Tier 1/2 map + Table 1.3.2-d): 0.8 (Tier 1) or 1 (Tier 2) per dwelling, plus visitors; said it cannot place the lot on the Tier map. 37k tokens (before de-duplicating images) |
+| I want to cut down a large backyard tree, do I need approval? | Found p17, clause 1.2.6.1(a)-(c) and Table 1.2.6-a: probably yes unless exempt species; said species is unknown. 6k tokens |
+
+Ideas noted for later: the NSW planning services include a tree-canopy layer, which could give the model a real "trees on this lot"
+fact for Danny's "there is a tree on the lot" example; the search score floor (0.30) still needs calibrating on the full index.
 
 ## Phase 2 (superseded by the meeting): which DCP? (measured, not guessed)
 
@@ -132,8 +149,8 @@ PixelRAG runs in WSL2 Ubuntu (Python 3.12 venv, pinned in `requirements-wsl.txt`
 ## Layout
 
 ```
-src/lib/server/   address.js  arcgis.js  geo.js  property.js  property-cache.js  db.js
-scripts/          pixelrag_sample.sh  pixelrag_serve.sh  pixelrag_query.js
+src/lib/server/   address.js  arcgis.js  geo.js  property.js  property-cache.js  db.js  chat.js  dcp_search.js
+scripts/          ask.js  pixelrag_sample.sh  pixelrag_serve.sh  pixelrag_query.js
                   try_address.js  find_addresses.js  record_fixtures.js  list_flood_lgas.js
                   collect_dcp_register.js  rank_dcps.js  pdf_stats.py  inspect_pdf.py  lib/(score, dcp_index, wsl)
 sql/              01_schema.sql   (dcp, dcp_page, property_facts)
