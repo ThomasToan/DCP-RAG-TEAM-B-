@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPropertyFacts } from '../src/lib/server/property.js';
+import { getPropertyFacts, lotLabel } from '../src/lib/server/property.js';
 import { PropertyError } from '../src/lib/server/property-error.js';
 import { loadFixtures, replayFetch } from './helpers/arcgis-fixtures.js';
 
@@ -36,7 +36,7 @@ describe('property facts: smoke addresses (recorded live data)', () => {
 			height_m: null,
 			heritage: null,
 			bushfire: null,
-			flood: false,
+			flood: null, // Cessnock is outside the 10 LGAs the state flood layer covers: unknown, not "no"
 			acid_sulfate: null,
 			precincts: [],
 			unknown: [],
@@ -50,7 +50,7 @@ describe('property facts: smoke addresses (recorded live data)', () => {
 
 	it('bushfire prone rural lot: Mulbring, Cessnock', async () => {
 		const f = await facts('32 Wallis Creek Lane, Mulbring');
-		expect(f).toMatchObject({ lga: 'CESSNOCK', zone: 'RU2', bushfire: 'Vegetation Category 1', flood: false, unknown: [] });
+		expect(f).toMatchObject({ lga: 'CESSNOCK', zone: 'RU2', bushfire: 'Vegetation Category 1', flood: null, unknown: [], not_covered: ['flood'] });
 		expect(f.lot_area_m2).toBeGreaterThan(40000);
 	});
 
@@ -62,7 +62,7 @@ describe('property facts: smoke addresses (recorded live data)', () => {
 
 	it('flood + acid sulfate: Horsley, Wollongong', async () => {
 		const f = await facts('16 Homestead Dr, Horsley');
-		expect(f).toMatchObject({ lga: 'WOLLONGONG', zone: 'R2', flood: true, acid_sulfate: 'Class 5', min_lot_m2: 449, unknown: [] });
+		expect(f).toMatchObject({ lga: 'WOLLONGONG', zone: 'R2', flood: true, acid_sulfate: 'Class 5', min_lot_m2: 449, unknown: [], not_covered: [] });
 	});
 
 	it('a unit number resolves to the parent lot, with a note', async () => {
@@ -100,6 +100,46 @@ describe('property facts: bad addresses fail clearly and cheaply', () => {
 		const err = await getPropertyFacts('999999 Nowhere Rd', { fetch, sleep: noSleep }).catch((e) => e);
 		expect(err.code).toBe('NOT_FOUND');
 		expect(calls.length).toBeLessThanOrEqual(3);
+	});
+});
+
+describe('lotLabel', () => {
+	it.each([
+		[{ lotnumber: '18', sectionnumber: null, planlabel: 'DP246833' }, 'Lot 18 DP 246833'],
+		[{ lotnumber: '3', sectionnumber: '2', planlabel: 'DP1234' }, 'Lot 3 Sec 2 DP 1234'],
+		[{ lotnumber: null, sectionnumber: null, planlabel: 'SP4529' }, 'SP 4529'] // strata plan: seen at 1 Clarence St, Port Macquarie
+	])('%j -> %s', (attrs, label) => expect(lotLabel(attrs)).toBe(label));
+});
+
+describe('property facts: flood coverage', () => {
+	it('outside the 10 LGAs the state layer covers, "no polygon" is reported as not covered, not as "no flood"', async () => {
+		const f = await facts('15 Ellalong St, Pelaw Main'); // Cessnock
+		expect(f.flood).toBeNull();
+		expect(f.flood_class).toBeNull();
+		expect(f.not_covered).toEqual(['flood']);
+		expect(f.unknown).toEqual([]); // a permanent data gap, distinct from a service outage
+		expect(f.notes.join(' ')).toMatch(/No state flood-planning data exists for CESSNOCK/);
+	});
+
+	it('inside a covered LGA the answer is a real boolean, and no gap is reported', async () => {
+		const f = await facts('16 Homestead Dr, Horsley'); // Wollongong, in a flood polygon
+		expect(f.flood).toBe(true);
+		expect(f.not_covered).toEqual([]);
+	});
+
+	it('a covered LGA with no polygon on the lot is a genuine false', async () => {
+		const real = replayFetch(table);
+		// Horsley recorded data, but pretend the lot is outside every flood polygon
+		const fetch = async (url, init) => (/Hazard\/MapServer\/(1|230)\//.test(url) ? json({ features: [] }) : real(url, init));
+		const f = await getPropertyFacts('16 Homestead Dr, Horsley', { fetch, sleep: noSleep });
+		expect(f.flood).toBe(false);
+		expect(f.not_covered).toEqual([]);
+	});
+
+	it('a bundle with a permanent data gap is still cached (only outages are not)', async () => {
+		const cache = memoryCache();
+		await getPropertyFacts('15 Ellalong St, Pelaw Main', { fetch: replayFetch(table), cache, sleep: noSleep });
+		expect(cache.sets).toBe(1);
 	});
 });
 

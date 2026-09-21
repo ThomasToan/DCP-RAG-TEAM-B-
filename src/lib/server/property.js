@@ -93,6 +93,13 @@ const bboxCentre = (rings) => {
 	return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
 };
 
+/** `Lot 18 DP 246833`; strata lots have no lot number, so `SP 4529` rather than `Lot null SP 4529`. */
+export function lotLabel(a) {
+	const lot = a.lotnumber ? `Lot ${a.lotnumber}` : '';
+	const section = a.sectionnumber ? `Sec ${a.sectionnumber}` : '';
+	return [lot, section, formatPlan(a.planlabel)].filter(Boolean).join(' ');
+}
+
 async function findLot(pt, deps) {
 	const base = {
 		geometry: `${pt.x},${pt.y}`,
@@ -129,7 +136,7 @@ async function findLot(pt, deps) {
 
 	return {
 		rings: f.geometry.rings,
-		label: `Lot ${a.lotnumber}${a.sectionnumber ? ` Sec ${a.sectionnumber}` : ''} ${formatPlan(a.planlabel)}`.trim(),
+		label: lotLabel(a),
 		areaM2: planArea && planArea > 0 ? planArea : Math.round(area * 10) / 10,
 		areaSource: planArea && planArea > 0 ? 'plan' : 'computed',
 		nearby,
@@ -270,6 +277,16 @@ const FACT_LAYERS = [
 	}
 ];
 
+/**
+ * The state flood-planning layer only has polygons for 10 of ~128 LGAs (checked 2026-09-21 with
+ * `returnDistinctValues` on LGA_NAME). Everywhere else "no polygon" means "no data", NOT "no flood risk".
+ * Refresh with: node scripts/list_flood_lgas.js
+ */
+export const FLOOD_MAPPED_LGAS = new Set([
+	'BATHURST REGIONAL', 'CLARENCE VALLEY', 'FORBES', 'HORNSBY', 'MID-WESTERN REGIONAL',
+	'TAMWORTH REGIONAL', 'WENTWORTH', 'WINGECARRIBEE', 'WOLLONGONG', 'YASS VALLEY'
+]);
+
 /** What each layer contributes when it could not be read: `null`, never a guessed `false`. */
 const UNKNOWN_VALUE = {
 	lga: { lga: null, council: null },
@@ -386,7 +403,16 @@ export async function getPropertyFacts(address, opts = {}) {
 	if (!facts.lga && facts.lga_epi) facts.lga = facts.lga_epi;
 	delete facts.lga_epi;
 
+	// "No flood polygon" only means "no flood" where the state layer covers this LGA at all. Elsewhere it is a data gap.
+	const notCovered = [];
+	if (facts.flood === false && !FLOOD_MAPPED_LGAS.has(String(facts.lga ?? '').toUpperCase())) {
+		facts.flood = null;
+		facts.flood_class = null;
+		notCovered.push('flood');
+	}
+
 	const notes = [];
+	if (notCovered.includes('flood')) notes.push(`No state flood-planning data exists for ${facts.lga ?? 'this LGA'}: flood status is not known.`);
 	if (parsed.unit) notes.push(`Unit ${parsed.unit} ignored: facts are for the whole lot.`);
 	if (lot.nearby) notes.push('No lot contained the address point; used the nearest lot within 25 m.');
 	if (lot.lotCount > 1 && !lot.nearby) notes.push(`${lot.lotCount} lots overlap the address point; used the largest.`);
@@ -402,7 +428,8 @@ export async function getPropertyFacts(address, opts = {}) {
 		lot_area_source: lot.areaSource,
 		...facts,
 		precincts: [], // DCP-defined; filled in later from the DCP itself, not from ArcGIS
-		unknown, // facts we could not read; the applicability layer must not treat these as "no"
+		unknown, // facts we could not read (service down); the applicability layer must not treat these as "no"
+		not_covered: notCovered, // facts the state data does not cover for this LGA (permanent, so the bundle is still cached)
 		notes,
 		sources,
 		fetched_at: new Date().toISOString()
