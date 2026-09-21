@@ -19,7 +19,10 @@ Thumbs.db
 !.env.test
 
 # Project data (large PDFs, page renders, PixelRAG index)
-/data/
+# data/ holds PDFs, page renders and stats; only the small CSV results are tracked
+/data/*
+!/data/dcp_index.csv
+!/data/dcp_ranking.csv
 /pixelrag_index/
 .venv/
 

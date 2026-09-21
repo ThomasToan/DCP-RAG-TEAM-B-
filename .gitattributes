@@ -1,0 +1,5 @@
+# Files that run inside Linux (WSL / the Postgres container) must keep LF endings even when cloned on Windows,
+# or bash fails with "$'\r': command not found".
+*.sh   text eol=lf
+*.py   text eol=lf
+*.sql  text eol=lf
