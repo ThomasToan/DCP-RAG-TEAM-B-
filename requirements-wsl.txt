@@ -1,0 +1,9 @@
+# Pinned versions of the WSL2 Ubuntu 24.04 venv (~/dcp-venv, Python 3.12.3) as of Phase 0.
+# Recreate: python3 -m venv ~/dcp-venv && source ~/dcp-venv/bin/activate
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements-wsl.txt
+pixelrag[index]==0.4.0
+markitdown[pdf]==0.1.7
+pymupdf==1.28.2
+# resolved transitive versions worth recording in the README
+# torch==2.14.0+cpu  torchvision==0.29.0  transformers==5.17.0  faiss-cpu==1.15.1
