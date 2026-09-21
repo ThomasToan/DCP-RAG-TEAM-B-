@@ -104,6 +104,7 @@ export async function answerQuestion({ facts, question, previousResponseId = nul
 	const retrieved = new Map(); // page -> best score seen
 	const sent = new Set(); // pages whose image is already in this conversation: never send the same image twice
 	const toolCalls = [];
+	const usage = { requests: 0, input_tokens: 0, output_tokens: 0 }; // summed over EVERY model request for this question
 	let prev = previousResponseId;
 	let input = previousResponseId
 		? [{ role: 'user', content: [asText(question)] }]
@@ -118,6 +119,9 @@ export async function answerQuestion({ facts, question, previousResponseId = nul
 			...(prev ? { previous_response_id: prev } : {})
 		});
 		prev = resp.id;
+		usage.requests += 1;
+		usage.input_tokens += resp.usage?.input_tokens ?? 0;
+		usage.output_tokens += resp.usage?.output_tokens ?? 0;
 
 		const calls = (resp.output ?? []).filter((o) => o.type === 'function_call');
 		if (calls.length === 0) {
@@ -130,7 +134,7 @@ export async function answerQuestion({ facts, question, previousResponseId = nul
 				responseId: resp.id,
 				rounds: round,
 				warnings: unsupported.length ? [`The answer mentions page(s) ${unsupported.join(', ')} that were not among the pages retrieved for it.`] : [],
-				usage: resp.usage ?? null
+				usage
 			};
 		}
 		if (round === maxRounds) break; // too many search rounds: fall through to the fallback
@@ -185,6 +189,6 @@ export async function answerQuestion({ facts, question, previousResponseId = nul
 	return {
 		answer: 'I could not settle this within the search limit. Please rephrase the question more narrowly, or ask a Hornsby Council planner.',
 		pages: [...retrieved].map(([page, score]) => ({ page, score })),
-		toolCalls, responseId: prev, warnings: ['search round limit reached'], rounds: maxRounds
+		toolCalls, responseId: prev, warnings: ['search round limit reached'], rounds: maxRounds, usage
 	};
 }

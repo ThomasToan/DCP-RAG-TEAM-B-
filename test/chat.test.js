@@ -133,6 +133,20 @@ describe('the search tool loop', () => {
 		expect(r.warnings.join(' ')).toMatch(/page\(s\) 99 that were not among the pages retrieved/);
 	});
 
+	it('usage is the SUM over every request of the question, not just the last one', async () => {
+		const withUsage = (resp, i, o) => ({ ...resp, usage: { input_tokens: i, output_tokens: o } });
+		const ai = fakeOpenAI(withUsage(toolResp('a', 'c1', 'r1'), 1000, 20), withUsage(toolResp('b', 'c2', 'r2'), 9000, 30), withUsage(finalResp('done'), 12000, 400));
+		const r = await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai));
+		expect(r.usage).toEqual({ requests: 3, input_tokens: 22000, output_tokens: 450 });
+	});
+
+	it('usage is still reported when the round cap is hit', async () => {
+		const withUsage = (resp) => ({ ...resp, usage: { input_tokens: 100, output_tokens: 5 } });
+		const ai = fakeOpenAI(...Array.from({ length: 5 }, (_, i) => withUsage(toolResp(`q${i}`, `c${i}`, `r${i}`))));
+		const r = await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai, fakeSearch(), { maxRounds: 1 }));
+		expect(r.usage).toEqual({ requests: 2, input_tokens: 200, output_tokens: 10 });
+	});
+
 	it('a page already shown is not sent as an image a second time', async () => {
 		const ai = fakeOpenAI(toolResp('parking', 'c1', 'r1'), toolResp('parking tiers', 'c2', 'r2'), finalResp('done'));
 		let loads = [];
