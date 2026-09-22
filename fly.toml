@@ -4,7 +4,10 @@
 #
 # app name must be globally unique on Fly - change it if `fly deploy` reports it is taken.
 app = "dcp-hornsby-search"
-primary_region = "iad"
+# Sydney: Fly auto-picked this region on the account's first deploy anyway, and it's the right
+# call for this project's real users (Hornsby Council, NSW planners) - lower latency than a US
+# region for them, worth the slightly higher per-hour rate.
+primary_region = "syd"
 
 [build]
 	dockerfile = "deploy/pixelrag/Dockerfile"
@@ -25,7 +28,11 @@ primary_region = "iad"
 		path = "/health"
 
 [[vm]]
-	size = "shared-cpu-2x"
-	memory_mb = 8192
+	# Fly caps memory per shared-CPU tier at 2 GB * vCPU count (verified from a real deploy error:
+	# shared-cpu-2x refused >4096 MiB). The search server needs 8.6 GB RSS measured live, so
+	# shared-cpu-4x's 8192 MiB ceiling has no safety margin - shared-cpu-8x (ceiling 16384 MiB)
+	# with 12 GB requested leaves headroom for the OS, Caddy and request bursts.
+	size = "shared-cpu-8x"
+	memory_mb = 12288
 	# if flyctl rejects memory_mb in your version, deploy without it and instead run:
-	#   fly scale memory 8192 -a dcp-hornsby-search
+	#   fly scale memory 12288 -a dcp-hornsby-search

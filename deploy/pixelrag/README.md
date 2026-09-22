@@ -6,16 +6,27 @@ PixelRAG API to point at instead (pixelrag.ai is a docs/demo site, not a service
 custom index). So: the chat app goes on Vercel as normal, and the search server goes on Fly.io,
 talking to each other over one environment variable, `PIXELRAG_URL`.
 
-Verified before writing this: search server RAM = **8.8 GB** measured live (`ps aux` on the
+Verified before writing this: search server RAM = **8.6 GiB RSS** measured live (`ps aux` on the
 running process), cold start = **24 s** with the model already cached, a query once warm =
 under 1-2 s.
 
 ## 1. The search server (Fly.io) — do this first
 
 You need a Fly.io account (**requires a credit card**) and the `flyctl` CLI. This is the one part
-that costs real money, though for occasional demo use with auto-stop it should be a few dollars
-at most, not the $22/month full-time rate (Fly's own pricing: $0.0309/hour for the 8 GB machine
-this needs, billed only while it's actually running).
+that costs real money. **Two things learned the hard way on a real deploy**, both already fixed in
+this repo, kept here so the reasoning isn't lost:
+
+- Fly's remote build machine has less RAM than the machine that runs the app. The Dockerfile used
+  to *load* the model at build time (`from_pretrained`, which mmaps the 4.25 GB weights file) and
+  the build died with `unable to mmap ... Cannot allocate memory`. Fixed: the build now only
+  *downloads* the file (`snapshot_download`); the real load happens at container start, on the
+  real machine.
+- Fly caps memory per shared-CPU size at **2 GB × vCPU count** (confirmed by the platform's own
+  error: `shared-cpu-2x` refused >4096 MiB). Our 8.6 GiB need doesn't fit `shared-cpu-4x` either
+  (its ceiling is exactly 8192 MiB, no headroom) — `fly.toml` uses **`shared-cpu-8x` at 12288 MiB**.
+  Verified price (Sydney, where Fly placed this app for us): **$0.0324/hour**, billed only while
+  running (auto-stop is on) — full-time 24/7 would be $83.94/month, but a demo used occasionally
+  should be a few dollars total, not that.
 
 ```bash
 # 1. Install flyctl (see https://fly.io/docs/flyctl/install/ for your OS), then:
@@ -27,7 +38,7 @@ fly apps create dcp-hornsby-search   # pick a different name if this one is take
 fly deploy
 
 # 3. If flyctl complains about `memory_mb` in fly.toml, deploy without it, then:
-fly scale memory 8192 -a dcp-hornsby-search
+fly scale memory 12288 -a dcp-hornsby-search
 ```
 
 `fly deploy` builds the Docker image (downloads the ~4.3 GB model during the build — this step
