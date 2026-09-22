@@ -17,7 +17,7 @@ primary_region = "iad"
 	min_machines_running = 0
 	# a cold start takes ~25s (loading the model); give Fly time before it gives up on the
 	# health check and recycles the machine
-	[http_service.checks.health]
+	[[http_service.checks]]
 		grace_period = "45s"
 		interval = "15s"
 		timeout = "5s"
