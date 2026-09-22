@@ -29,12 +29,13 @@ RUN pip install --no-cache-dir torch==2.14.0 --index-url https://download.pytorc
 RUN pip install --no-cache-dir 'pixelrag[index,serve]==0.4.0'
 RUN pip install --no-cache-dir --force-reinstall --no-deps torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
 
-# Bake the model into the image layer cache, so a fresh machine never needs to hit Hugging Face.
-RUN python -c "\
-from transformers import AutoProcessor, Qwen3VLForConditionalGeneration; \
-m = 'Qwen/Qwen3-VL-Embedding-2B'; \
-AutoProcessor.from_pretrained(m, trust_remote_code=True); \
-Qwen3VLForConditionalGeneration.from_pretrained(m, trust_remote_code=True, torch_dtype='float32')"
+# Bake the model files into the image layer cache, so a fresh machine never needs to hit Hugging
+# Face. Deliberately just a file download (snapshot_download), NOT from_pretrained: loading the
+# 4.25 GB safetensors file with from_pretrained mmaps it into memory, and Fly's remote build
+# machine does not have enough RAM for that (seen: "unable to mmap ... Cannot allocate memory").
+# snapshot_download only writes files to the same HF cache path from_pretrained reads later, at
+# container *start* time - which runs on the real 8 GB machine (fly.toml [[vm]]), not the builder.
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('Qwen/Qwen3-VL-Embedding-2B')"
 
 COPY data/hornsby/index_full ./index
 COPY data/hornsby/pages ./pages
