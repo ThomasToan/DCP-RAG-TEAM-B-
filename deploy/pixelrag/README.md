@@ -35,7 +35,8 @@ fly auth signup   # or: fly auth login
 # 2. From the PROJECT ROOT (so the build sees data/hornsby/*):
 fly apps create dcp-hornsby-search   # pick a different name if this one is taken;
                                       # update `app = "..."` in fly.toml to match
-fly deploy
+fly deploy --ha=false   # --ha=false: a demo doesn't need Fly's default 2-machine redundancy,
+                         # and the 2nd machine roughly doubles cost if it ever runs concurrently
 
 # 3. If flyctl complains about `memory_mb` in fly.toml, deploy without it, then:
 fly scale memory 12288 -a dcp-hornsby-search
@@ -55,6 +56,14 @@ curl -I https://dcp-hornsby-search.fly.dev/pages/p0037.png   # should be HTTP 20
 
 The first request after any idle period takes ~25 s (the machine was stopped and has to load the
 model back into memory) — that's expected, not a bug.
+
+**If `fly deploy` gets interrupted** (e.g. Ctrl+C while it's waiting on a health check) you can
+end up with an extra unhealthy machine sitting around. Check with `fly status`; if one shows
+`1 total, 1 passing` and another shows `1 total, 1 critical`, the passing one is fine and already
+serving traffic - just remove the broken one:
+```bash
+fly machine destroy <bad-machine-id> -a dcp-hornsby-search --force
+```
 
 ## 2. The chat app (Vercel)
 
