@@ -20,7 +20,15 @@ export const DEFAULTS = {
 	floor: 0.4,
 	chunksToFetch: 12,
 	topPages: 4,
-	pagesDir: 'data/hornsby/pages'
+	pagesDir: 'data/hornsby/pages',
+	/**
+	 * 'fs' (default): loadPageImage reads pagesDir off local disk - true for the CLI scripts and
+	 * for local dev, where the SvelteKit server and the rendered PNGs are on the same machine.
+	 * 'http': fetch `${url}/pages/pNNNN.png` from the PixelRAG server instead. Needed in production:
+	 * a Vercel function has no local copy of the 250 MB of page images, only the deployed Fly
+	 * server does (see deploy/pixelrag/Caddyfile, which serves them alongside /search).
+	 */
+	pagesSource: 'fs'
 };
 
 /** PDF page number from a hit's source file name (p0037.png -> 37); null if it does not look like one of ours. */
@@ -59,7 +67,17 @@ export async function searchPages(query, opts = {}) {
 
 /** @returns {Promise<{ mime: string, base64: string }>} */
 export async function loadPageImage(page, opts = {}) {
-	const { pagesDir } = { ...DEFAULTS, ...opts };
-	const file = join(pagesDir, `p${String(page).padStart(4, '0')}.png`);
+	const { pagesDir, pagesSource, url } = { ...DEFAULTS, ...opts };
+	const name = `p${String(page).padStart(4, '0')}.png`;
+
+	if (pagesSource === 'http') {
+		const doFetch = opts.fetch ?? fetch;
+		const res = await doFetch(`${url}/pages/${name}`);
+		if (!res.ok) throw new Error(`fetching page ${page} failed: HTTP ${res.status}`);
+		const bytes = Buffer.from(await res.arrayBuffer());
+		return { mime: res.headers.get('content-type') || 'image/png', base64: bytes.toString('base64') };
+	}
+
+	const file = join(pagesDir, name);
 	return { mime: 'image/png', base64: (await readFile(file)).toString('base64') };
 }

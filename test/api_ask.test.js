@@ -105,6 +105,15 @@ describe('POST /api/ask: the happy path', () => {
 		expect(input).toEqual({ facts: FACTS, question: 'Can I build a shed?', previousResponseId: 'resp_0' });
 		expect(deps.model).toBe('gpt-5.6-terra');
 		expect(deps.openai).toBeInstanceOf(Object);
+		expect(deps.searchOpts).toEqual({}); // no PIXELRAG_URL set in this test: local defaults apply
+	});
+
+	it('forwards PIXELRAG_URL and switches page images to HTTP mode when set (production)', async () => {
+		mockEnv.env.PIXELRAG_URL = 'https://dcp-hornsby-search.fly.dev';
+		await post({ address: '16 Dural St, Hornsby', question: 'q' });
+		delete mockEnv.env.PIXELRAG_URL;
+		const [, deps] = answerQuestion.mock.calls[0];
+		expect(deps.searchOpts).toEqual({ url: 'https://dcp-hornsby-search.fly.dev', pagesSource: 'http' });
 	});
 
 	it('the response never leaks internal fact fields (ids, coordinates, raw ArcGIS sources)', async () => {

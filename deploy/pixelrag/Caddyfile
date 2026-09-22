@@ -1,0 +1,12 @@
+:8080 {
+	# rendered DCP page images, e.g. /pages/p0037.png -> ./pages/p0037.png
+	handle_path /pages/* {
+		root * /app/pages
+		file_server
+	}
+	# everything else (/search, /health, /status, /tile, ...) goes to pixelrag serve,
+	# which listens on localhost only - Caddy is the one and only port Fly exposes
+	handle {
+		reverse_proxy 127.0.0.1:8090
+	}
+}

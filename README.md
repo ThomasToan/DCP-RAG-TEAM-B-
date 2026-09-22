@@ -29,7 +29,7 @@ first, then share a Vercel link.
 | 4 | Index all 489 pages on a free Colab GPU (`notebooks/hornsby_index_colab.ipynb`) | done: 1,956 vectors, 16 MB (`data/hornsby/index_full`) |
 | 5 | Chat brain: facts + retrieved page images -> answer citing clause and page (`src/lib/server/chat.js`, try it with `scripts/ask.js`) | done as a CLI, tested on the full index |
 | 6 | Chat UI (`src/routes/+page.svelte`, `/api/ask`) | done, tested in-browser |
-| 7 | Deploy, send Danny a link | next |
+| 7 | Deploy (Fly.io search server + Vercel app) | in progress, see `deploy/pixelrag/README.md` |
 
 ## Hornsby DCP 2024 + PixelRAG: first test
 
@@ -114,6 +114,22 @@ with a follow-up composer that carries `previousResponseId`.
 Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
 first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model
 call). No console errors.
+
+## Deployment
+
+Two services, since the search server needs ~8.8 GB RAM (measured live) and Vercel functions cap
+at 2-4 GB (verified on Vercel's docs) on any plan, and there is no real hosted PixelRAG API to use
+instead (pixelrag.ai has no way to point it at a custom index). Full steps, verified pricing and
+the one known limitation (the search server has no auth - low risk, the only data behind it is the
+public DCP): **`deploy/pixelrag/README.md`**.
+
+- **Search server**: Fly.io, `deploy/pixelrag/Dockerfile` (Caddy in front of `pixelrag serve`,
+  one public port; the model and the 489 rendered pages are baked into the image so a fresh
+  machine never depends on Hugging Face being reachable). `fly.toml` at the project root.
+- **Chat app**: Vercel, unchanged code; `PIXELRAG_URL` set switches it from localhost + local disk
+  to the Fly URL + fetching page images over HTTP (`src/lib/server/dcp_search.js`'s `pagesSource`).
+- **Database**: Neon via Vercel Marketplace (`vercel install neon`) - its pooled `DATABASE_URL` is
+  exactly the variable `db.js` already reads, so no code changes needed there.
 
 ## Phase 2 (superseded by the meeting): which DCP? (measured, not guessed)
 

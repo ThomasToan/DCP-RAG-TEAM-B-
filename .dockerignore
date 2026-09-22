@@ -1,0 +1,10 @@
+# Keep the build context small. dcp_raw (Phase 2's downloaded council PDFs, ~2 GB) is the only
+# large thing under data/ that the pixelrag image does not need - everything else in data/hornsby
+# is a few hundred MB total, harmless to send even though only index_full and pages are COPYd.
+node_modules
+.svelte-kit
+build
+.git
+.env
+.env.*
+data/dcp_raw

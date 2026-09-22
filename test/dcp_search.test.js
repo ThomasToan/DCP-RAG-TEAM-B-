@@ -81,4 +81,22 @@ describe('loadPageImage', () => {
 	it('rejects for a page that was never rendered', async () => {
 		await expect(loadPageImage(9999, { pagesDir: tmpdir() })).rejects.toThrow();
 	});
+
+	describe('pagesSource: "http" (production, no local copy of the pages)', () => {
+		it('fetches PIXELRAG_URL/pages/pNNNN.png instead of reading disk', async () => {
+			let requestedUrl;
+			const fetch = async (url) => {
+				requestedUrl = url;
+				return new Response(new Uint8Array([1, 2, 3]), { headers: { 'content-type': 'image/png' } });
+			};
+			const img = await loadPageImage(37, { pagesSource: 'http', url: 'https://x.fly.dev', fetch });
+			expect(requestedUrl).toBe('https://x.fly.dev/pages/p0037.png');
+			expect(img).toEqual({ mime: 'image/png', base64: Buffer.from([1, 2, 3]).toString('base64') });
+		});
+
+		it('throws on an HTTP error rather than returning a broken image', async () => {
+			const fetch = async () => new Response('nope', { status: 404 });
+			await expect(loadPageImage(37, { pagesSource: 'http', url: 'https://x.fly.dev', fetch })).rejects.toThrow(/HTTP 404/);
+		});
+	});
 });

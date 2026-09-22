@@ -49,9 +49,14 @@ export async function POST({ request }) {
 	}
 
 	openai ??= new OpenAI({ apiKey: env.OPENAI_API_KEY });
+	// PIXELRAG_URL points at the deployed search server (Fly.io); unset in local dev, where
+	// answerQuestion/dcp_search.js fall back to their own http://127.0.0.1:30001 default and read
+	// page images off local disk. Set, it also switches page-image loading to fetch over HTTP: a
+	// Vercel function has no local copy of the 250 MB of rendered pages, only the Fly server does.
+	const searchOpts = env.PIXELRAG_URL ? { url: env.PIXELRAG_URL, pagesSource: 'http' } : {};
 	let result;
 	try {
-		result = await answerQuestion({ facts, question, previousResponseId }, { openai, model: MODEL });
+		result = await answerQuestion({ facts, question, previousResponseId }, { openai, model: MODEL, searchOpts });
 	} catch (e) {
 		console.error('answerQuestion failed', e);
 		return json({ error: 'ANSWER_FAILED', message: 'Something went wrong answering that question. Please try again.' }, { status: 502 });

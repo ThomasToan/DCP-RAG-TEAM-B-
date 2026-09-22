@@ -1,0 +1,31 @@
+# Fly.io app for the PixelRAG search server (see deploy/pixelrag/README.md for the full deploy steps).
+# Build context is the project root (this file's directory), because the Dockerfile COPYs
+# data/hornsby/index_full and data/hornsby/pages from here.
+#
+# app name must be globally unique on Fly - change it if `fly deploy` reports it is taken.
+app = "dcp-hornsby-search"
+primary_region = "iad"
+
+[build]
+	dockerfile = "deploy/pixelrag/Dockerfile"
+
+[http_service]
+	internal_port = 8080
+	force_https = true
+	auto_stop_machines = "stop"
+	auto_start_machines = true
+	min_machines_running = 0
+	# a cold start takes ~25s (loading the model); give Fly time before it gives up on the
+	# health check and recycles the machine
+	[http_service.checks.health]
+		grace_period = "45s"
+		interval = "15s"
+		timeout = "5s"
+		method = "GET"
+		path = "/health"
+
+[[vm]]
+	size = "shared-cpu-2x"
+	memory_mb = 8192
+	# if flyctl rejects memory_mb in your version, deploy without it and instead run:
+	#   fly scale memory 8192 -a dcp-hornsby-search
