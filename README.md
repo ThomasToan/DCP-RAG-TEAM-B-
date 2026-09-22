@@ -28,8 +28,8 @@ first, then share a Vercel link.
 | 3 | Hornsby DCP 2024 + PixelRAG 10-page test on CPU | done, see below |
 | 4 | Index all 489 pages on a free Colab GPU (`notebooks/hornsby_index_colab.ipynb`) | done: 1,956 vectors, 16 MB (`data/hornsby/index_full`) |
 | 5 | Chat brain: facts + retrieved page images -> answer citing clause and page (`src/lib/server/chat.js`, try it with `scripts/ask.js`) | done as a CLI, tested on the full index |
-| 6 | Chat UI | |
-| 7 | Deploy, send Danny a link | |
+| 6 | Chat UI (`src/routes/+page.svelte`, `/api/ask`) | done, tested in-browser |
+| 7 | Deploy, send Danny a link | next |
 
 ## Hornsby DCP 2024 + PixelRAG: first test
 
@@ -100,6 +100,20 @@ Live answers on the full index (`scripts/ask.js`, 16 Dural Street, Hornsby, R4):
   the page) while this lot is R4, says permissibility is an LEP question it has no data for, and refuses a definite yes. Before the
   search cap it ran 9 searches and 150k tokens; with `MAX_SEARCHES = 4` it uses 35k (about $0.05-0.10) with the same conclusion, slightly less detail.
 - Cost reference: OpenAI's usage page showed $0.14 for the first two 10-page-index questions.
+
+## Chat UI
+
+`/api/ask` (POST `{address, question, previousResponseId?}`) wires the address box to the whole pipeline: property
+facts (server-computed and cached; the client never supplies facts, only the address text) -> `chat.js` -> a trimmed
+JSON response (no internal ids/coordinates). `/dcp-page/[page]` serves one rendered page as PNG, page number validated
+1-489 before any filesystem access. The page (`src/routes/+page.svelte`) is an address box, a question box, and a
+conversation view with the model's Markdown rendered properly (`src/lib/markdown.js`: a small hand-written renderer,
+not a dependency, that escapes all input before adding any tag) and the cited pages shown as clickable-size images,
+with a follow-up composer that carries `previousResponseId`.
+
+Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
+first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model
+call). No console errors.
 
 ## Phase 2 (superseded by the meeting): which DCP? (measured, not guessed)
 
@@ -179,6 +193,8 @@ PixelRAG runs in WSL2 Ubuntu (Python 3.12 venv, pinned in `requirements-wsl.txt`
 
 ```
 src/lib/server/   address.js  arcgis.js  geo.js  property.js  property-cache.js  db.js  chat.js  dcp_search.js
+src/lib/          markdown.js
+src/routes/       +page.svelte  api/ask/+server.js  dcp-page/[page]/+server.js
 scripts/          ask.js  eval_retrieval.js  pixelrag_sample.sh  pixelrag_serve.sh  pixelrag_query.js
                   try_address.js  find_addresses.js  record_fixtures.js  list_flood_lgas.js
                   collect_dcp_register.js  rank_dcps.js  pdf_stats.py  inspect_pdf.py  lib/(score, dcp_index, wsl)
