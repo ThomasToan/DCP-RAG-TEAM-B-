@@ -67,6 +67,13 @@ fly machine destroy <bad-machine-id> -a dcp-hornsby-search --force
 
 ## 2. The chat app (Vercel)
 
+**This app needs `@sveltejs/adapter-vercel`, not `adapter-node`** (already set in `vite.config.js`
+in this repo - flagging it because it's an easy thing to silently break if the adapter ever gets
+reverted). On Windows, building with adapter-vercel needs symlink permission: turn on
+**Settings → Privacy & security → For developers → Developer Mode** once, or the build fails with
+`EPERM: operation not permitted, symlink`. This only affects testing the build locally
+(`npm run build`); Vercel's own remote build runs on Linux and is unaffected either way.
+
 ```bash
 npm i -g vercel        # if you don't have it
 vercel login
@@ -82,11 +89,37 @@ vercel env add PIXELRAG_URL production     # paste the Fly URL from step 1, no t
 vercel --prod
 ```
 
-After the first deploy, run the schema against the new database once (get the connection string
-with `vercel env pull` or from the Neon dashboard):
+**`data/` must be excluded from the upload** (`.vercelignore`, already in this repo) - without it,
+`vercel --prod` tries to upload Phase 2's leftover council PDFs (~2 GB, some files over 100 MB) and
+fails with `File size limit exceeded (100 MB)`. None of `data/` is needed at runtime: page images
+come from `PIXELRAG_URL`, property facts from Postgres.
+
+**Vercel functions must run in the SAME region as the Fly machine** (`vercel.json`,
+`"regions": ["syd1"]` for Sydney - already in this repo). Vercel defaults to `iad1` (US). A real
+deploy without this pinned showed the actual failure mode: Fly's own logs said
+`could not find a good candidate within 40 attempts at load balancing` from Fly's **iad** edge,
+even though the machine runs in **syd** - the US-based Vercel function's request landed at Fly's
+nearest (US) edge first, which then failed to route across Fly's network to the Sydney machine. A
+retry does not fix this (tried it first - a failing request just took 82s to fail instead of 40s);
+matching the region does.
+
+After the first deploy, run the schema against the new database once:
 ```bash
-psql "$DATABASE_URL" -f sql/01_schema.sql
+vercel env pull --environment=production .env.production.local
+psql "$(grep '^DATABASE_URL=' .env.production.local | cut -d= -f2- | tr -d '"')" -f sql/01_schema.sql
+rm .env.production.local   # don't leave production DB credentials sitting on disk
 ```
+
+## Expect the first request after idle to be genuinely slow
+
+With auto-stop machines, the first real user action after Fly's machine has gone idle triggers a
+cold start: model reload (~15-25s) plus, for `/api/ask`, however long OpenAI's own multi-round tool
+calling takes on top of that (30-60s+ for a real question, even warm - see the chat brain section
+above). **A first request can legitimately take 60-100+ seconds.** This is a genuine cost/latency
+trade-off of choosing auto-stop over an always-on machine, not a bug: verified live, a real
+`/api/ask` call on a cold machine completed correctly in 100s; the same question again (warm)
+completed in 42s. If this is a real usability concern, raise `min_machines_running` to `1` in
+`fly.toml` (removes the cold start entirely, at the full hourly rate around the clock instead).
 
 ## What changes between local dev and production
 

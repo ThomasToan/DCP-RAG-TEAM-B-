@@ -29,3 +29,9 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+.env*
+
+# Claude Code local tooling state, not part of this project
+.agents/
+.claude/
+skills-lock.json

@@ -20,6 +20,8 @@ The 2026-09-21 supervisor meeting changed the goal: use the **Hornsby** DCP, and
 this address?" with reasons and clause numbers, judged later by professional planners (who supply the tests). Get it running
 first, then share a Vercel link.
 
+**Live:** https://dcp-rag-team-b.vercel.app
+
 | Step | | State |
 |---|---|---|
 | 0 | Setup: SvelteKit, Docker Postgres + pgvector, WSL2 PixelRAG environment | done |
@@ -29,7 +31,7 @@ first, then share a Vercel link.
 | 4 | Index all 489 pages on a free Colab GPU (`notebooks/hornsby_index_colab.ipynb`) | done: 1,956 vectors, 16 MB (`data/hornsby/index_full`) |
 | 5 | Chat brain: facts + retrieved page images -> answer citing clause and page (`src/lib/server/chat.js`, try it with `scripts/ask.js`) | done as a CLI, tested on the full index |
 | 6 | Chat UI (`src/routes/+page.svelte`, `/api/ask`) | done, tested in-browser |
-| 7 | Deploy (Fly.io search server + Vercel app) | in progress, see `deploy/pixelrag/README.md` |
+| 7 | Deploy (Fly.io search server + Vercel app) | **done and verified live**, see `deploy/pixelrag/README.md` |
 
 ## Hornsby DCP 2024 + PixelRAG: first test
 
