@@ -1,0 +1,9 @@
+# The deployed app never reads local data/ at runtime: page images come from PIXELRAG_URL
+# (Fly.io) and property facts are cached in Postgres, not on disk. Excluding it entirely avoids
+# uploading ~2GB of Phase 2's leftover PDF downloads on every deploy - some individual files
+# (up to ~297MB) exceed Vercel's 100MB per-file upload limit and broke the first deploy attempt.
+data
+node_modules
+.svelte-kit
+.vercel
+build
