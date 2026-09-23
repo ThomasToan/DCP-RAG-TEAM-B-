@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env } from '$env/dynamic/private';
-import { DEFAULTS } from '$lib/server/dcp_search.js';
+import { DEFAULTS, fetchWithRetry } from '$lib/server/dcp_search.js';
 
 const MAX_PAGE = 489; // Hornsby DCP 2024 page count; bump if the indexed DCP changes
 
@@ -22,7 +22,9 @@ export async function GET({ params, fetch }) {
 	const cache = { 'cache-control': 'public, max-age=31536000, immutable' };
 
 	if (env.PIXELRAG_URL) {
-		const res = await fetch(`${env.PIXELRAG_URL}/pages/${name}`);
+		// one retry: right after Fly wakes a stopped machine, its edge can briefly forward a request
+		// before the app inside is listening, giving a real-but-wrong response rather than a thrown error
+		const res = await fetchWithRetry(fetch, `${env.PIXELRAG_URL}/pages/${name}`);
 		if (!res.ok) error(404, 'Page image not available');
 		return new Response(res.body, { headers: { 'content-type': res.headers.get('content-type') || 'image/png', ...cache } });
 	}

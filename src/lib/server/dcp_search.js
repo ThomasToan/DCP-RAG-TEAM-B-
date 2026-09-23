@@ -37,6 +37,32 @@ export function pageOf(hit) {
 	return m ? Number(m[1]) : null;
 }
 
+const defaultSleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * One retry after a short delay, for the transient window right after a Fly machine wakes from
+ * auto-stop. Seen live: two real requests a few seconds apart during a cold start, one got a clean
+ * 200 and the other a plain HTTP 404 (not a thrown error - Fly's edge had already started
+ * forwarding traffic before the app inside had finished starting). Not for general resilience
+ * against a genuinely broken server: exactly one retry, then whatever the second attempt returned
+ * (success, failure response, or thrown error) is final.
+ */
+export async function fetchWithRetry(doFetch, url, init, sleep = defaultSleep) {
+	let last;
+	for (let attempt = 0; attempt < 2; attempt++) {
+		if (attempt > 0) await sleep(3000);
+		try {
+			const res = await doFetch(url, init);
+			if (res.ok) return res;
+			last = res;
+		} catch (e) {
+			last = e;
+		}
+	}
+	if (last instanceof Response) return last;
+	throw last;
+}
+
 /**
  * @param {string} query
  * @param {Partial<typeof DEFAULTS> & { fetch?: typeof fetch }} [opts]
@@ -46,11 +72,12 @@ export async function searchPages(query, opts = {}) {
 	const { url, floor, chunksToFetch, topPages } = { ...DEFAULTS, ...opts };
 	const doFetch = opts.fetch ?? fetch;
 
-	const res = await doFetch(`${url}/search`, {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({ queries: [{ text: query }], n_docs: chunksToFetch })
-	});
+	const res = await fetchWithRetry(
+		doFetch,
+		`${url}/search`,
+		{ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ queries: [{ text: query }], n_docs: chunksToFetch }) },
+		opts.sleep
+	);
 	if (!res.ok) throw new Error(`PixelRAG search failed: HTTP ${res.status}`);
 	const hits = (await res.json()).results?.[0]?.hits ?? [];
 
@@ -72,7 +99,7 @@ export async function loadPageImage(page, opts = {}) {
 
 	if (pagesSource === 'http') {
 		const doFetch = opts.fetch ?? fetch;
-		const res = await doFetch(`${url}/pages/${name}`);
+		const res = await fetchWithRetry(doFetch, `${url}/pages/${name}`, undefined, opts.sleep);
 		if (!res.ok) throw new Error(`fetching page ${page} failed: HTTP ${res.status}`);
 		const bytes = Buffer.from(await res.arrayBuffer());
 		return { mime: res.headers.get('content-type') || 'image/png', base64: bytes.toString('base64') };
