@@ -86,6 +86,17 @@ describe('describeFacts: unknown is never rendered as "no"', () => {
 		expect(describeFacts(FACTS)).toMatch(/Flood planning: no/);
 		expect(describeFacts({ ...FACTS, heritage: 'item I26' })).toMatch(/Heritage: item I26/);
 	});
+	it('names the heritage conservation area, so the model can pick the right DCP table', () => {
+		const f = { ...FACTS, heritage: 'HCA', heritage_detail: [{ class: 'Conservation Area - General', id: 'C2', name: 'Beecroft, Cheltenham Heritage Conservation Area', significance: 'Local' }] };
+		expect(describeFacts(f)).toMatch(/Heritage: HCA \(Beecroft, Cheltenham Heritage Conservation Area\)/);
+	});
+	it('names a heritage item and an area together, each name once', () => {
+		const f = { ...FACTS, heritage: 'item I26; HCA', heritage_detail: [{ name: 'Old Mill' }, { name: 'Old Mill' }, { name: 'The Crescent, Pennant Hills Heritage Conservation Area' }] };
+		expect(describeFacts(f)).toMatch(/Heritage: item I26; HCA \(Old Mill; The Crescent, Pennant Hills Heritage Conservation Area\)/);
+	});
+	it('heritage with no names in the detail is shown as before', () => {
+		expect(describeFacts({ ...FACTS, heritage: 'HCA', heritage_detail: [{ name: null }] })).toMatch(/Heritage: HCA\n/);
+	});
 	it('tells the model what it cannot see', () => {
 		expect(describeFacts(FACTS)).toMatch(/Not available to you: street trees/);
 	});
@@ -319,6 +330,7 @@ ${CLAUSES_PROMPT}`);
 		expect(CLAUSES_PROMPT).toMatch(/Never say a type is allowed or prohibited/);
 		expect(CLAUSES_PROMPT).toMatch(/clause number that is printed on a page you were shown/);
 		expect(CLAUSES_PROMPT).toMatch(/Leave a clause out rather than guess/);
+		expect(CLAUSES_PROMPT).toMatch(/Never list the controls of a differently named area/);
 	});
 
 	it('asks for the section layout the page can render (headings and flat bullets)', () => {

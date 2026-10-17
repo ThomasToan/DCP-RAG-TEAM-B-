@@ -124,6 +124,21 @@ bullet cites a printed clause number and a PDF page. It never says a type is all
 about 65k input tokens. Spot-checked against the page images (pages 115 and 337): the floor-area, landscaping and dual
 occupancy figures it listed matched. Not measured: how complete the list is over many addresses, or how repeatable.
 
+### Map-dependent controls (task 2 trial)
+
+Some DCP rules apply only inside a mapped area. Findings so far:
+
+- **Heritage conservation areas: solved with NSW data, not by reading a picture.** The NSW heritage layer names the area
+  (8 Killaloe Avenue is in "Beecroft, Cheltenham Heritage Conservation Area"). `describeFacts` now passes that name to the
+  model. Before, the model only saw "HCA" and listed the controls of the wrong area (The Crescent, Pennant Hills).
+  With the name it searched for the right area and found Clause 9.7 (PDF page 439), but not that area's own detailed
+  controls on later pages, and said so.
+- **DCP-only maps: the model cannot place an address on them.** Figure 1.3-b (PDF page 37, Hornsby Town Centre parking
+  tiers) has no street names or landmarks, only "TIER 1" / "TIER 2" labels. The model confirmed this ("NONE" when asked
+  for legible names) and answered CANNOT TELL for 16 Dural Street and 1 High Street, Hornsby in all 6 runs, rather than
+  guessing. It said OUTSIDE for 8 Killaloe Avenue (Pennant Hills) in 2 of 3 runs, CANNOT TELL in the third. Placing a lot
+  on such a map needs the map georeferenced (known coordinates for points on it), which is manual work per map.
+
 Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
 first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model
 call). No console errors.

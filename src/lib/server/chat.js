@@ -44,6 +44,7 @@ The user gave only an address and no question. Produce a checklist of the DCP cl
   ## Controls triggered by this property's overlays   (heritage, bushfire, flood and so on, whether the facts show them or leave them unknown)
   ## Controls that depend on a DCP map   (rules the pages show apply only inside a mapped area: name the map and its PDF page, and say you cannot tell from the facts whether this property is inside it)
   ## Not found   (development types or overlays you searched for and found no clause for)
+- If the facts name a heritage conservation area or heritage item, search for that exact name and list only the controls the pages show for that area. Never list the controls of a differently named area.
 - Every bullet needs a clause number that is printed on a page you were shown, plus the PDF page number. Leave a clause out rather than guess its number. A short accurate list is better than a long uncertain one.`;
 
 export const TOOLS = [
@@ -71,7 +72,14 @@ export function describeFacts(f) {
 	const notCovered = new Set(f.not_covered ?? []);
 	const flood = notCovered.has('flood') ? 'NOT COVERED (no state flood data for this council)' : unknown.has('flood') ? 'NOT KNOWN (service unavailable)' : yesNo(f.flood);
 	const bush = unknown.has('bushfire') ? 'NOT KNOWN (service unavailable)' : (f.bushfire ?? 'not mapped as bushfire prone');
-	const heritage = unknown.has('heritage') ? 'NOT KNOWN (service unavailable)' : (f.heritage ?? 'none');
+	// The NSW heritage layer names each item and conservation area. Without the name the model cannot tell which
+	// of the DCP's many conservation-area tables applies to this lot.
+	const heritageNames = [...new Set((f.heritage_detail ?? []).map((d) => d.name).filter(Boolean))];
+	const heritage = unknown.has('heritage')
+		? 'NOT KNOWN (service unavailable)'
+		: f.heritage
+			? `${f.heritage}${heritageNames.length ? ` (${heritageNames.join('; ')})` : ''}`
+			: 'none';
 	const line = (label, v) => `- ${label}: ${v ?? 'none / not mapped'}`;
 	return [
 		`Address: ${f.address}`,
