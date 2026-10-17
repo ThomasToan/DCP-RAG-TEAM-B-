@@ -113,6 +113,17 @@ conversation view with the model's Markdown rendered properly (`src/lib/markdown
 not a dependency, that escapes all input before adding any tag) and the cited pages shown as clickable-size images,
 with a follow-up composer that carries `previousResponseId`.
 
+### List applicable clauses (address only, no question)
+
+`POST /api/ask {address, mode: "clauses"}` (the "List applicable clauses" button, or
+`node scripts/ask.js --clauses "<address>"`) asks the model to pick the development types that fit the lot (dwelling house,
+dual occupancy, subdivision, ...), search the DCP for each plus each overlay in the property facts, and return a checklist:
+development types with their clauses, overlay controls, controls that depend on a DCP map, and what was not found. Every
+bullet cites a printed clause number and a PDF page. It never says a type is allowed (that is the LEP, not the DCP). It allows
+6 searches instead of 4, so it is slower and costlier than a normal question: 8 Killaloe Avenue, Pennant Hills took 59 s and
+about 65k input tokens. Spot-checked against the page images (pages 115 and 337): the floor-area, landscaping and dual
+occupancy figures it listed matched. Not measured: how complete the list is over many addresses, or how repeatable.
+
 Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
 first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model
 call). No console errors.

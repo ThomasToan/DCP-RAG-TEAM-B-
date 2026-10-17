@@ -102,7 +102,7 @@ describe('POST /api/ask: the happy path', () => {
 		await post({ address: '16 Dural St, Hornsby', question: 'Can I build a shed?', previousResponseId: 'resp_0' });
 		expect(answerQuestion).toHaveBeenCalledTimes(1);
 		const [input, deps] = answerQuestion.mock.calls[0];
-		expect(input).toEqual({ facts: FACTS, question: 'Can I build a shed?', previousResponseId: 'resp_0' });
+		expect(input).toEqual({ facts: FACTS, question: 'Can I build a shed?', previousResponseId: 'resp_0', mode: 'ask' });
 		expect(deps.model).toBe('gpt-5.6-terra');
 		expect(deps.openai).toBeInstanceOf(Object);
 		expect(deps.searchOpts).toEqual({}); // no PIXELRAG_URL set in this test: local defaults apply
@@ -146,5 +146,39 @@ describe('POST /api/ask: the model call fails', () => {
 		const res = await post({ address: '16 Dural St, Hornsby', question: 'q' });
 		expect(res.status).toBe(502);
 		expect((await res.json()).error).toBe('ANSWER_FAILED');
+	});
+});
+
+describe('POST /api/ask: clauses mode (address only)', () => {
+	it('needs no question, and passes mode to answerQuestion', async () => {
+		const res = await post({ address: '16 Dural St, Hornsby', mode: 'clauses' });
+		expect(res.status).toBe(200);
+		expect(getPropertyFacts).toHaveBeenCalledTimes(1);
+		expect(answerQuestion.mock.calls[0][0]).toMatchObject({ facts: FACTS, mode: 'clauses' });
+	});
+
+	it('ignores a question that is blank or invalid, because none is used', async () => {
+		for (const question of ['', 5, null, 'x'.repeat(2000)]) {
+			const res = await post({ address: '16 Dural St, Hornsby', mode: 'clauses', question });
+			expect(res.status).toBe(200);
+		}
+	});
+
+	it('still requires an address', async () => {
+		const res = await post({ address: '  ', mode: 'clauses' });
+		expect(res.status).toBe(400);
+		expect(getPropertyFacts).not.toHaveBeenCalled();
+	});
+
+	it('rejects an unknown mode before anything downstream runs', async () => {
+		const res = await post({ address: '16 Dural St, Hornsby', question: 'q', mode: 'everything' });
+		expect(res.status).toBe(400);
+		expect(getPropertyFacts).not.toHaveBeenCalled();
+	});
+
+	it('default mode still requires a question and passes mode "ask"', async () => {
+		expect((await post({ address: '16 Dural St, Hornsby' })).status).toBe(400);
+		await post({ address: '16 Dural St, Hornsby', question: 'q' });
+		expect(answerQuestion.mock.calls.at(-1)[0].mode).toBe('ask');
 	});
 });

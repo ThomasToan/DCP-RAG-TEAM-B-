@@ -11,7 +11,7 @@ const MODEL = env.OPENAI_MODEL || 'gpt-5.6-terra';
 let openai;
 
 /**
- * POST /api/ask   { address, question, previousResponseId? }
+ * POST /api/ask   { address, question, previousResponseId?, mode? }   mode 'clauses' = list the relevant clauses, no question needed
  *
  * The address is resolved to property facts server-side (never trusted from the client beyond the raw text typed),
  * exactly as in property.js's own design: the facts bundle is the scope, and it is computed here, not sent by the
@@ -24,11 +24,15 @@ export async function POST({ request }) {
 	} catch {
 		return json({ error: 'BAD_REQUEST', message: 'Expected JSON body.' }, { status: 400 });
 	}
-	const { address, question, previousResponseId } = body ?? {};
+	const { address, question, previousResponseId, mode = 'ask' } = body ?? {};
+	if (mode !== 'ask' && mode !== 'clauses') {
+		return json({ error: 'BAD_REQUEST', message: 'Invalid mode.' }, { status: 400 });
+	}
 	if (typeof address !== 'string' || !address.trim()) {
 		return json({ error: 'BAD_REQUEST', message: 'Enter an address.' }, { status: 400 });
 	}
-	if (typeof question !== 'string' || !question.trim() || question.length > 1000) {
+	// 'clauses' lists the relevant clauses for the address and needs no question
+	if (mode === 'ask' && (typeof question !== 'string' || !question.trim() || question.length > 1000)) {
 		return json({ error: 'BAD_REQUEST', message: 'Enter a question (under 1,000 characters).' }, { status: 400 });
 	}
 	if (previousResponseId != null && typeof previousResponseId !== 'string') {
@@ -56,7 +60,7 @@ export async function POST({ request }) {
 	const searchOpts = env.PIXELRAG_URL ? { url: env.PIXELRAG_URL, pagesSource: 'http' } : {};
 	let result;
 	try {
-		result = await answerQuestion({ facts, question, previousResponseId }, { openai, model: MODEL, searchOpts });
+		result = await answerQuestion({ facts, question, previousResponseId, mode }, { openai, model: MODEL, searchOpts });
 	} catch (e) {
 		console.error('answerQuestion failed', e);
 		return json({ error: 'ANSWER_FAILED', message: 'Something went wrong answering that question. Please try again.' }, { status: 502 });

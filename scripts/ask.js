@@ -1,5 +1,6 @@
 // End-to-end from the command line: address -> property facts -> PixelRAG page search -> AI answer with page citations.
 //   node scripts/ask.js "16 Dural St, Hornsby" "How many parking spaces do I need for a 2 bedroom apartment?"
+//   node scripts/ask.js --clauses "16 Dural St, Hornsby"     (no question: list the relevant clauses for the address)
 // Needs: the PixelRAG server running (scripts/pixelrag_serve.sh), OPENAI_API_KEY in .env, and rendered pages in data/hornsby/pages.
 import OpenAI from 'openai';
 import { getPropertyFacts } from '../src/lib/server/property.js';
@@ -7,9 +8,11 @@ import { PropertyError } from '../src/lib/server/property-error.js';
 import { answerQuestion, describeFacts } from '../src/lib/server/chat.js';
 
 process.loadEnvFile('.env');
-const [address, question] = process.argv.slice(2);
-if (!address || !question) {
-	console.error('usage: node scripts/ask.js "<address>" "<question>"');
+const args = process.argv.slice(2);
+const clauses = args[0] === '--clauses';
+const [address, question] = clauses ? [args[1], ''] : args;
+if (!address || (!clauses && !question)) {
+	console.error('usage: node scripts/ask.js "<address>" "<question>"\n       node scripts/ask.js --clauses "<address>"');
 	process.exit(2);
 }
 if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'sk-...') {
@@ -30,7 +33,7 @@ console.log('--- facts the model is given ---\n' + describeFacts(facts) + '\n');
 
 const t0 = Date.now();
 const r = await answerQuestion(
-	{ facts, question },
+	{ facts, question, mode: clauses ? 'clauses' : 'ask' },
 	{ openai: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }), model, searchOpts: { url: process.env.PIXELRAG_URL ?? 'http://127.0.0.1:30001' } }
 );
 

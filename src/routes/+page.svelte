@@ -11,29 +11,34 @@
 	let previousResponseId = $state(null);
 	let factsOpen = $state(false);
 
-	const canAsk = $derived(!loading && address.trim() && question.trim());
+	let listing = $state(false); // true while a "list applicable clauses" request is running
 
-	async function ask() {
-		if (!canAsk) return;
-		const q = question.trim();
+	const canAsk = $derived(!loading && address.trim() && question.trim());
+	const canList = $derived(!loading && address.trim());
+
+	async function ask(mode = 'ask') {
+		const clauses = mode === 'clauses';
+		if (clauses ? !canList : !canAsk) return;
+		const q = clauses ? 'List the relevant DCP clauses for this address' : question.trim();
 		const isFirst = !previousResponseId;
 		error = '';
 		loading = true;
+		listing = clauses;
 		messages = [...messages, { role: 'user', text: q }];
-		question = '';
+		if (!clauses) question = '';
 
 		try {
 			const res = await fetch('/api/ask', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ address: address.trim(), question: q, previousResponseId })
+				body: JSON.stringify({ address: address.trim(), mode, ...(clauses ? {} : { question: q }), previousResponseId })
 			});
 			const body = await res.json();
 			if (!res.ok) {
 				error = body.message || 'Something went wrong.';
 				if (body.details?.suggestions?.length) error += ` Did you mean: ${body.details.suggestions.join(', ')}?`;
 				messages = messages.slice(0, -1); // the question never got an answer: don't leave it dangling
-				question = q; // give it back so the user can fix and resend
+				if (!clauses) question = q; // give it back so the user can fix and resend
 				return;
 			}
 			if (isFirst) {
@@ -45,9 +50,10 @@
 		} catch {
 			error = 'Could not reach the server. Check your connection and try again.';
 			messages = messages.slice(0, -1);
-			question = q;
+			if (!clauses) question = q;
 		} finally {
 			loading = false;
+			listing = false;
 		}
 	}
 
@@ -83,7 +89,11 @@
 			<input id="address" type="text" bind:value={address} placeholder="e.g. 16 Dural Street, Hornsby" onkeydown={(e) => e.key === 'Enter' && address.trim() && document.getElementById('question')?.focus()} />
 			<label for="question">Question</label>
 			<textarea id="question" bind:value={question} placeholder="e.g. Can I build a granny flat here?" rows="2" onkeydown={onKeydown}></textarea>
-			<button onclick={ask} disabled={!canAsk}>{loading ? 'Asking…' : 'Ask'}</button>
+			<div class="actions">
+				<button onclick={() => ask()} disabled={!canAsk}>{loading && !listing ? 'Asking…' : 'Ask'}</button>
+				<button class="secondary" onclick={() => ask('clauses')} disabled={!canList}>{loading && listing ? 'Listing…' : 'List applicable clauses'}</button>
+			</div>
+			<p class="hint">No question? Enter just the address and choose "List applicable clauses" to see the DCP clauses that apply to the property, by development type. This takes about a minute.</p>
 			{#if error}<p class="error">{error}</p>{/if}
 		</section>
 	{:else}
@@ -128,14 +138,14 @@
 						{/if}
 					</div>
 				{/each}
-				{#if loading}<div class="message assistant"><p class="text loading">Searching the DCP…</p></div>{/if}
+				{#if loading}<div class="message assistant"><p class="text loading">{listing ? 'Listing the relevant clauses… this takes about a minute.' : 'Searching the DCP…'}</p></div>{/if}
 			</div>
 
 			{#if error}<p class="error">{error}</p>{/if}
 
 			<div class="composer">
 				<textarea bind:value={question} placeholder="Ask a follow-up question…" rows="2" onkeydown={onKeydown} disabled={loading}></textarea>
-				<button onclick={ask} disabled={!canAsk}>{loading ? '…' : 'Ask'}</button>
+				<button onclick={() => ask()} disabled={!canAsk}>{loading ? '…' : 'Ask'}</button>
 			</div>
 		</section>
 	{/if}
@@ -188,6 +198,26 @@
 	button:disabled {
 		background: #99b6cf;
 		cursor: not-allowed;
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	button.secondary {
+		background: white;
+		color: #1a5fa4;
+		border: 1px solid #1a5fa4;
+	}
+	button.secondary:disabled {
+		background: white;
+		color: #99b6cf;
+		border-color: #99b6cf;
+	}
+	.hint {
+		color: #555;
+		font-size: 13px;
+		margin: 10px 0 0;
 	}
 	button.link {
 		background: none;

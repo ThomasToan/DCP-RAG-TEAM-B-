@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { answerQuestion, describeFacts, citedPageNumbers, TOOLS, SYSTEM_PROMPT, MAX_ROUNDS, MAX_SEARCHES } from '../src/lib/server/chat.js';
+import { answerQuestion, describeFacts, citedPageNumbers, TOOLS, SYSTEM_PROMPT, MAX_ROUNDS, MAX_SEARCHES, CLAUSES_PROMPT, CLAUSES_QUESTION, CLAUSES_MAX_SEARCHES, CLAUSES_MAX_ROUNDS } from '../src/lib/server/chat.js';
 
 // A real-shaped facts bundle (what property.js returns) for a Hornsby lot
 const FACTS = {
@@ -252,4 +252,77 @@ describe('citedPageNumbers', () => {
 		['no citations here', []],
 		['clause 1.2.6.1 sets it', []] // a clause number is not a page number
 	])('%s', (text, pages) => expect([...citedPageNumbers(text)].sort((a, b) => a - b)).toEqual(pages));
+});
+
+describe('clauses mode: an address with no question lists the relevant clauses', () => {
+	it('asks the fixed clause-list question, ignores any question text, and still sends the facts first', async () => {
+		const ai = fakeOpenAI(finalResp('list'));
+		await answerQuestion({ facts: FACTS, question: 'ignore me', mode: 'clauses' }, deps(ai));
+		const first = ai.calls[0].input[0].content[0].text;
+		expect(first).toContain('16 DURAL STREET HORNSBY');
+		expect(first).toContain(`QUESTION: ${CLAUSES_QUESTION}`);
+		expect(first).not.toContain('ignore me');
+	});
+
+	it('works with no question at all', async () => {
+		const ai = fakeOpenAI(finalResp('list'));
+		const r = await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai));
+		expect(ai.calls).toHaveLength(1);
+		expect(r.answer).toBe('list');
+	});
+
+	it('sends the normal grounding rules plus the clause-list task on every request', async () => {
+		const ai = fakeOpenAI(toolResp('dwelling house controls'), finalResp('list'));
+		await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai));
+		for (const c of ai.calls) {
+			expect(c.instructions).toBe(`${SYSTEM_PROMPT}
+
+${CLAUSES_PROMPT}`);
+			expect(c.instructions).toMatch(/Never invent a clause number/);
+		}
+	});
+
+	it('default mode is unchanged: no clause-list instructions', async () => {
+		const ai = fakeOpenAI(finalResp('ok'));
+		await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai));
+		expect(ai.calls[0].instructions).toBe(SYSTEM_PROMPT);
+		expect(ai.calls[0].instructions).not.toMatch(/LIST THE RELEVANT CLAUSES/);
+	});
+
+	it('allows more searches than a normal question, and tells the model so', async () => {
+		expect(CLAUSES_MAX_SEARCHES).toBeGreaterThan(MAX_SEARCHES);
+		expect(CLAUSES_MAX_ROUNDS).toBeGreaterThan(MAX_ROUNDS);
+		expect(CLAUSES_PROMPT).toContain(`search limit is ${CLAUSES_MAX_SEARCHES}`);
+		const six = { id: 'r1', output: Array.from({ length: 7 }, (_, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: `q${i}` }) })) };
+		const ai = fakeOpenAI(six, finalResp('done'));
+		const search = fakeSearch();
+		await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai, search));
+		expect(search.seen).toHaveLength(CLAUSES_MAX_SEARCHES); // the 7th is refused
+	});
+
+	it('an explicit maxSearches still wins', async () => {
+		const three = { id: 'r1', output: ['a', 'b', 'c'].map((q, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: q }) })) };
+		const ai = fakeOpenAI(three, finalResp('done'));
+		const search = fakeSearch();
+		await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai, search, { maxSearches: 2 }));
+		expect(search.seen).toEqual(['a', 'b']);
+	});
+
+	it('a property outside Hornsby never reaches the model in this mode either', async () => {
+		const ai = fakeOpenAI(finalResp('nope'));
+		const r = await answerQuestion({ facts: { ...FACTS, lga: 'CESSNOCK' }, mode: 'clauses' }, deps(ai));
+		expect(ai.calls).toHaveLength(0);
+		expect(r.skippedModel).toBe(true);
+	});
+
+	it('the task never lets the model call a development type allowed, and requires printed clause numbers', () => {
+		expect(CLAUSES_PROMPT).toMatch(/Never say a type is allowed or prohibited/);
+		expect(CLAUSES_PROMPT).toMatch(/clause number that is printed on a page you were shown/);
+		expect(CLAUSES_PROMPT).toMatch(/Leave a clause out rather than guess/);
+	});
+
+	it('asks for the section layout the page can render (headings and flat bullets)', () => {
+		for (const h of ['Development types and their DCP controls', 'overlays', 'depend on a DCP map', 'Not found']) expect(CLAUSES_PROMPT).toContain(h);
+		expect(CLAUSES_PROMPT).toMatch(/flat "- " bullets only/);
+	});
 });
