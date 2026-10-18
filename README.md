@@ -138,6 +138,15 @@ Some DCP rules apply only inside a mapped area. Findings so far:
   for legible names) and answered CANNOT TELL for 16 Dural Street and 1 High Street, Hornsby in all 6 runs, rather than
   guessing. It said OUTSIDE for 8 Killaloe Avenue (Pennant Hills) in 2 of 3 runs, CANNOT TELL in the third. Placing a lot
   on such a map needs the map georeferenced (known coordinates for points on it), which is manual work per map.
+- **Marker-on-map trial (Figure 9.7-a, Beecroft-Cheltenham HCA, PDF page 440): it works.** The red outline on that map is
+  the same polygon NSW publishes for the area, so aligning the two gives the map's scale and position (overlay checked by
+  eye: the outlines coincide). Then any address's coordinates become a pixel position, and we draw one magenta dot on the
+  page picture. Given that picture, the model decided INSIDE/OUTSIDE the outline correctly in 26 of 26 answers (13
+  addresses x 2 runs, 11 inside and 2 outside per NSW data; 10 Hull Road sits on the boundary and was called inside, as NSW
+  says). Its precinct answers were stable except 50 Beecroft Road (Plateau once, North once), and their correctness was
+  NOT independently verified. Limits: one map; only 2 outside addresses; the dots are drawn by our code from the
+  calibration, so the model reads the picture but does not locate the address itself; this only works where a DCP outline
+  matches an NSW polygon (heritage areas); the trial scripts were run in a scratch session and are not yet app code.
 
 Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
 first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model
