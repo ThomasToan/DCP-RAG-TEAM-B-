@@ -10,17 +10,17 @@ import registry from './dcp_maps.json' with { type: 'json' };
 export const MAPS = registry.maps;
 
 /** Maps sent with the first message for every property inside them: the ones that decide WHICH rules apply. */
-const AREA_MAPS = new Set(['heritage']);
+const AREA_MAPS = new Set(['heritage', 'mixed-use']);
 const AREA_MAP_IDS = new Set(['htc-parking-tiers', 'htc-precincts']);
 
 const INSET = 8; // a dot this close to the picture edge is treated as outside the map
 
 export const isAreaMap = (m) => AREA_MAPS.has(m.group) || AREA_MAP_IDS.has(m.id);
 
-/** Pixel position of (lon, lat) on the map's page image. */
+/** Pixel position of (lon, lat) on the map's page image. bx and ay are only present for maps drawn rotated. */
 export function toPixel(m, lon, lat) {
 	const t = m.transform;
-	return { x: t.ax * lon + t.cx, y: t.by * lat + t.dy };
+	return { x: t.ax * lon + (t.bx ?? 0) * lat + t.cx, y: (t.ay ?? 0) * lon + t.by * lat + t.dy };
 }
 
 /** The map, with the dot position, if the point falls inside the map picture; otherwise null. */
@@ -33,7 +33,8 @@ export function placeOnMap(m, point) {
 }
 
 /**
- * Area maps to show for this property: Town Centre tier and precinct maps when the property falls inside the picture,
+ * Area maps to show for this property: Town Centre tier and precinct maps and mixed use precinct maps when the property
+ * falls inside the picture,
  * and a heritage map only when NSW data puts the property in one of that map's conservation areas (the picture then
  * shows the precinct and the boundary; for every other property it would add nothing).
  */

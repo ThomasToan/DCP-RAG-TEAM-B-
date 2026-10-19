@@ -159,6 +159,7 @@ export async function answerQuestion({ facts, question, previousResponseId = nul
 	if (!previousResponseId) {
 		for (const placed of areaMaps(facts)) {
 			const page = placed.map.page;
+			if (sent.has(page)) continue; // one image per page, even when a page holds several small maps
 			const marked = await markedImage(page, placed, loadImage, searchOpts);
 			if (!marked) continue;
 			input[0].content.push(asText(`DCP MAP CHECK, PDF page ${page} of the ${DCP_NAME}: ${marked.note}`), imagePart(marked));

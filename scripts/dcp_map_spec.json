@@ -630,6 +630,1059 @@
     1227
    ],
    "exclude": []
+  },
+  {
+   "id": "setback-berowra-heights",
+   "page": 219,
+   "figure": "4.2-b",
+   "title": "Berowra Heights centre setbacks",
+   "frame": [
+    94,
+    183,
+    940,
+    819
+   ],
+   "near": [
+    151.14,
+    -33.61
+   ],
+   "anchor": {
+    "a": [
+     "TURNER",
+     "ROAD"
+    ],
+    "b": [
+     "BEROWRA WATERS",
+     "ROAD"
+    ],
+    "px": [
+     799,
+     628
+    ]
+   },
+   "mpp": [
+    0.4,
+    2.0
+   ],
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-dural-service-centre",
+   "page": 219,
+   "figure": "4.2-c",
+   "title": "Dural Service Centre setbacks",
+   "frame": [
+    94,
+    870,
+    940,
+    1538
+   ],
+   "near": [
+    151.03,
+    -33.68
+   ],
+   "anchor": {
+    "a": [
+     "QUARRY",
+     "ROAD"
+    ],
+    "b": [
+     "OLD NORTHERN",
+     "ROAD"
+    ],
+    "px": [
+     424,
+     970
+    ]
+   },
+   "mpp": [
+    0.5,
+    3.0
+   ],
+   "search_px": 120,
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-hornsby-bridge-road",
+   "page": 220,
+   "figure": "4.2-d",
+   "title": "Hornsby (Bridge Road) setbacks",
+   "frame": [
+    97,
+    186,
+    927,
+    846
+   ],
+   "near": [
+    151.1,
+    -33.7
+   ],
+   "anchor": {
+    "a": [
+     "HUNTER",
+     "STREET"
+    ],
+    "b": [
+     "LINDA",
+     "STREET"
+    ],
+    "px": [
+     855,
+     825
+    ]
+   },
+   "mpp": [
+    0.5,
+    1.8
+   ],
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-hornsby-romsey-street",
+   "page": 220,
+   "figure": "4.2-e",
+   "title": "Hornsby (Romsey Street) setbacks",
+   "frame": [
+    95,
+    895,
+    937,
+    1568
+   ],
+   "near": [
+    151.1,
+    -33.705
+   ],
+   "anchor": {
+    "a": [
+     "EDGEWORTH DAVID",
+     "AVENUE"
+    ],
+    "b": [
+     "THOMAS",
+     "STREET"
+    ],
+    "px": [
+     460,
+     1180
+    ]
+   },
+   "mpp": [
+    0.2,
+    0.8
+   ],
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-pennant-hills",
+   "page": 221,
+   "figure": "4.2-f",
+   "title": "Pennant Hills centre setbacks",
+   "frame": [
+    94,
+    183,
+    1144,
+    1023
+   ],
+   "near": [
+    151.07,
+    -33.737
+   ],
+   "anchor": {
+    "lonlat": [
+     151.0715538,
+     -33.7389661
+    ],
+    "note": "Pennant Hills Road crossing the railway at Pennant Hills station (NSW roads x NSW railway)",
+    "px": [
+     654,
+     688
+    ]
+   },
+   "mpp": [
+    0.5,
+    1.3
+   ],
+   "search_px": 80,
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-thornleigh",
+   "page": 222,
+   "figure": "4.2-g",
+   "title": "Thornleigh centre setbacks (Section 4.4 controls supersede this diagram where they conflict)",
+   "frame": [
+    97,
+    209,
+    1085,
+    1578
+   ],
+   "near": [
+    151.08,
+    -33.73
+   ],
+   "anchor": {
+    "a": [
+     "OAKLEIGH",
+     "AVENUE"
+    ],
+    "b": [
+     "THE ESPLANADE",
+     ""
+    ],
+    "px": [
+     415,
+     714
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.2
+   ],
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-waitara",
+   "page": 223,
+   "figure": "4.2-h",
+   "title": "Waitara centre setbacks",
+   "frame": [
+    94,
+    183,
+    1144,
+    983
+   ],
+   "near": [
+    151.105,
+    -33.71
+   ],
+   "anchor": {
+    "a": [
+     "PACIFIC",
+     "HIGHWAY"
+    ],
+    "b": [
+     "ROMSEY",
+     "STREET"
+    ],
+    "px": [
+     790,
+     660
+    ]
+   },
+   "mpp": [
+    0.4,
+    1.6
+   ],
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "mu-asquith-commercial",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Asquith Commercial Centre",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    97,
+    408,
+    478,
+    731
+   ],
+   "near": [
+    151.108,
+    -33.689
+   ],
+   "anchor": {
+    "a": [
+     "WATTLE",
+     "STREET"
+    ],
+    "b": [
+     "AMOR",
+     "STREET"
+    ],
+    "px": [
+     205,
+     420
+    ]
+   },
+   "mpp": [
+    0.45,
+    0.9
+   ],
+   "search_px": 70,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply.",
+   "skip": "automatic fit did not line up (NSW roads crossed the drawn lots); the inset is too small and blurry. Needs manual control points."
+  },
+  {
+   "id": "mu-bouvardia-asquith",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Bouvardia Street, Asquith",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    97,
+    789,
+    478,
+    1119
+   ],
+   "near": [
+    151.108,
+    -33.689
+   ],
+   "anchor": {
+    "a": [
+     "BOUVARDIA",
+     "STREET"
+    ],
+    "b": [
+     "PACIFIC",
+     "HIGHWAY"
+    ],
+    "px": [
+     188,
+     1105
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.6
+   ],
+   "search_px": 40,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply.",
+   "fallback_anchors": [
+    {
+     "a": [
+      "WATTLE",
+      "STREET"
+     ],
+     "b": [
+      "PACIFIC",
+      "HIGHWAY"
+     ],
+     "px": [
+      372,
+      1045
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mu-palmerston-waitara",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Palmerston Road, Waitara",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    97,
+    1175,
+    480,
+    1493
+   ],
+   "near": [
+    151.103,
+    -33.707
+   ],
+   "anchor": {
+    "a": [
+     "PALMERSTON",
+     "ROAD"
+    ],
+    "b": [
+     "EDGEWORTH DAVID",
+     "AVENUE"
+    ],
+    "px": [
+     425,
+     1412
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.6
+   ],
+   "search_px": 40,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply."
+  },
+  {
+   "id": "mu-normanhurst-road",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Normanhurst Road, Normanhurst",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    659,
+    253,
+    1054,
+    531
+   ],
+   "near": [
+    151.097,
+    -33.721
+   ],
+   "anchor": {
+    "a": [
+     "NORMANHURST",
+     "ROAD"
+    ],
+    "b": [
+     "MILSON",
+     "PARADE"
+    ],
+    "px": [
+     848,
+     400
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.6
+   ],
+   "search_px": 40,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply.",
+   "fallback_anchors": [
+    {
+     "a": [
+      "HAMMOND",
+      "AVENUE"
+     ],
+     "b": [
+      "MILSON",
+      "PARADE"
+     ],
+     "px": [
+      700,
+      470
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mu-pennant-hills-rd-thornleigh",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Pennant Hills Road, Thornleigh",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    659,
+    587,
+    1054,
+    861
+   ],
+   "near": [
+    151.079,
+    -33.731
+   ],
+   "anchor": {
+    "a": [
+     "RAILWAY",
+     "PARADE"
+    ],
+    "b": [
+     "PENNANT HILLS",
+     "ROAD"
+    ],
+    "px": [
+     885,
+     645
+    ]
+   },
+   "mpp": [
+    0.45,
+    0.9
+   ],
+   "search_px": 70,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply.",
+   "fallback_anchors": [
+    {
+     "a": [
+      "STATION",
+      "STREET"
+     ],
+     "b": [
+      "PENNANT HILLS",
+      "ROAD"
+     ],
+     "px": [
+      985,
+      760
+     ]
+    }
+   ],
+   "skip": "automatic fit did not line up (NSW roads crossed the drawn lots); the inset is too small and blurry. Needs manual control points."
+  },
+  {
+   "id": "mu-thompsons-corner",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Thompsons Corner, West Pennant Hills",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    659,
+    917,
+    1054,
+    1201
+   ],
+   "near": [
+    151.04,
+    -33.75
+   ],
+   "anchor": {
+    "a": [
+     "CASTLE HILL",
+     "ROAD"
+    ],
+    "b": [
+     "PENNANT HILLS",
+     "ROAD"
+    ],
+    "px": [
+     860,
+     1195
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.6
+   ],
+   "search_px": 40,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply."
+  },
+  {
+   "id": "mu-beecroft-heritage",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Beecroft Heritage Precinct",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    659,
+    1220,
+    930,
+    1660
+   ],
+   "near": [
+    151.066,
+    -33.749
+   ],
+   "anchor": {
+    "a": [
+     "BEECROFT",
+     "ROAD"
+    ],
+    "b": [
+     "HANNAH",
+     "STREET"
+    ],
+    "px": [
+     700,
+     1290
+    ]
+   },
+   "mpp": [
+    0.45,
+    0.9
+   ],
+   "search_px": 70,
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply.",
+   "fallback_anchors": [
+    {
+     "a": [
+      "BEECROFT",
+      "ROAD"
+     ],
+     "b": [
+      "WONGALA",
+      "CRESCENT"
+     ],
+     "px": [
+      740,
+      1610
+     ]
+    }
+   ],
+   "skip": "automatic fit did not line up (NSW roads crossed the drawn lots); the inset is too small and blurry. Needs manual control points."
+  },
+  {
+   "id": "htc-heritage-facade-retention",
+   "page": 284,
+   "figure": "4.5-l",
+   "title": "Hornsby Town Centre: heritage and facade retention (Western Heritage Precinct)",
+   "group": "town-centre",
+   "method": "anchor",
+   "frame": [
+    94,
+    183,
+    1066,
+    1407
+   ],
+   "near": [
+    151.098,
+    -33.704
+   ],
+   "anchor": {
+    "a": [
+     "CORONATION",
+     "STREET"
+    ],
+    "b": [
+     "JERSEY",
+     "STREET"
+    ],
+    "px": [
+     705,
+     432
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.0
+   ],
+   "search_px": 80,
+   "exclude": [
+    [
+     640,
+     1280,
+     1066,
+     1407
+    ]
+   ],
+   "labels": "Dark purple = significant heritage item; light purple = other heritage items; yellow dashed line = preferred retention of building facade."
+  },
+  {
+   "id": "htc-west-heritage-ground-setbacks",
+   "page": 292,
+   "figure": "4.5-q",
+   "title": "Hornsby Town Centre: primary ground floor setbacks (Western Heritage Precinct)",
+   "group": "town-centre",
+   "method": "anchor",
+   "frame": [
+    95,
+    184,
+    1145,
+    1514
+   ],
+   "near": [
+    151.098,
+    -33.704
+   ],
+   "anchor": {
+    "a": [
+     "CORONATION",
+     "STREET"
+    ],
+    "b": [
+     "JERSEY",
+     "STREET"
+    ],
+    "px": [
+     785,
+     470
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.0
+   ],
+   "search_px": 80,
+   "exclude": [
+    [
+     640,
+     1170,
+     1145,
+     1514
+    ]
+   ],
+   "labels": "Coloured lines are ground floor setbacks: dark purple 0 m build to line; mid purple 0 m mixed use ground floor; light purple 3 m residential ground floor; green-yellow 3 m; teal 6 m (interface with residential zoning)."
+  },
+  {
+   "id": "htc-west-heritage-podium",
+   "page": 294,
+   "figure": "4.5-s",
+   "title": "Hornsby Town Centre: above-podium setbacks and podium heights (Western Heritage Precinct)",
+   "group": "town-centre",
+   "method": "anchor",
+   "frame": [
+    95,
+    184,
+    1145,
+    1656
+   ],
+   "near": [
+    151.098,
+    -33.704
+   ],
+   "anchor": {
+    "a": [
+     "CORONATION",
+     "STREET"
+    ],
+    "b": [
+     "JERSEY",
+     "STREET"
+    ],
+    "px": [
+     830,
+     480
+    ]
+   },
+   "mpp": [
+    0.3,
+    1.0
+   ],
+   "search_px": 80,
+   "exclude": [
+    [
+     620,
+     1370,
+     1145,
+     1656
+    ]
+   ],
+   "labels": "Solid lines show podium height: yellow 2 storeys, green 3 storeys, purple 5 storeys. Dashed lines are the setback line for the tower element, with the setback in metres written beside them."
+  },
+  {
+   "id": "industrial-habitat-asquith",
+   "page": 322,
+   "figure": "5.1-c",
+   "title": "Potentially significant flora and fauna habitat, industrial land at Asquith/Hornsby",
+   "group": "industrial",
+   "method": "anchor",
+   "frame": [
+    94,
+    944,
+    1099,
+    1534
+   ],
+   "near": [
+    151.11,
+    -33.685
+   ],
+   "anchor": {
+    "a": [
+     "KELRAY",
+     "PLACE"
+    ],
+    "b": [
+     "SALISBURY",
+     "ROAD"
+    ],
+    "px": [
+     112,
+     1300
+    ]
+   },
+   "fallback_anchors": [
+    {
+     "a": [
+      "LEIGHTON",
+      "PLACE"
+     ],
+     "b": [
+      "SALISBURY",
+      "ROAD"
+     ],
+     "px": [
+      300,
+      1440
+     ]
+    }
+   ],
+   "mpp": [
+    0.5,
+    1.6
+   ],
+   "search_px": 140,
+   "labels": "Olive-green shading marks potentially significant flora and fauna habitat on industrial zoned land.",
+   "rotation_deg": [
+    -20,
+    20,
+    4
+   ]
+  },
+  {
+   "id": "industrial-habitat-mount-kuring-gai",
+   "page": 322,
+   "figure": "5.1-b",
+   "title": "Potentially significant flora and fauna habitat, industrial land at Mount Kuring-gai",
+   "group": "industrial",
+   "method": "anchor",
+   "frame": [
+    94,
+    185,
+    1096,
+    863
+   ],
+   "skip": "the map has no street names or other labels to start a fit from",
+   "labels": "Olive-green shading marks potentially significant flora and fauna habitat on industrial zoned land."
+  },
+  {
+   "id": "river-jetty-brooklyn-1",
+   "page": 389,
+   "figure": "8.2-c",
+   "title": "Brooklyn jetty limits (north)",
+   "group": "river-settlements",
+   "method": "anchor",
+   "frame": [
+    98,
+    186,
+    1069,
+    1620
+   ],
+   "near": [
+    151.225,
+    -33.548
+   ],
+   "anchor": {
+    "a": [
+     "JAMES",
+     "ROAD"
+    ],
+    "b": [
+     "BROOKLYN",
+     "ROAD"
+    ],
+    "px": [
+     770,
+     1015
+    ]
+   },
+   "mpp": [
+    0.35,
+    0.6
+   ],
+   "search_px": 60,
+   "rotation_list": [
+    -100,
+    -96,
+    -92,
+    -88,
+    -84,
+    -80,
+    80,
+    84,
+    88,
+    92,
+    96,
+    100
+   ],
+   "exclude": [
+    [
+     98,
+     1150,
+     160,
+     1620
+    ]
+   ],
+   "labels": "The thick dashed line is the jetty limit: private jetties and waterway structures may not extend beyond it. The map is drawn turned sideways (north is not up); lot numbers are printed in each lot."
+  },
+  {
+   "id": "river-jetty-brooklyn-2",
+   "page": 390,
+   "figure": "8.2-d",
+   "title": "Brooklyn jetty limits (south)",
+   "group": "river-settlements",
+   "method": "anchor",
+   "frame": [
+    95,
+    183,
+    1128,
+    1623
+   ],
+   "near": [
+    151.225,
+    -33.548
+   ],
+   "anchor": {
+    "a": [
+     "WHARF",
+     "STREET"
+    ],
+    "b": [
+     "BROOKLYN",
+     "ROAD"
+    ],
+    "px": [
+     580,
+     770
+    ]
+   },
+   "mpp": [
+    0.4,
+    0.7
+   ],
+   "search_px": 60,
+   "rotation_list": [
+    -100,
+    -96,
+    -92,
+    -88,
+    -84,
+    -80,
+    80,
+    84,
+    88,
+    92,
+    96,
+    100
+   ],
+   "exclude": [
+    [
+     95,
+     1170,
+     160,
+     1623
+    ]
+   ],
+   "labels": "The thick dashed line is the jetty limit: private jetties and waterway structures may not extend beyond it. The map is drawn turned sideways (north is not up); lot numbers are printed in each lot."
+  },
+  {
+   "id": "river-dangar-island",
+   "page": 388,
+   "figure": "8.2-b",
+   "title": "Dangar Island private waterway structure limits",
+   "group": "river-settlements",
+   "method": "anchor",
+   "frame": [
+    95,
+    183,
+    1090,
+    1591
+   ],
+   "near": [
+    151.2394,
+    -33.5395
+   ],
+   "anchor": {
+    "lonlat": [
+     151.2394033,
+     -33.539501
+    ],
+    "note": "centre of the NSW suburb outline of Dangar Island",
+    "px": [
+     625,
+     940
+    ]
+   },
+   "mpp": [
+    0.7,
+    1.05
+   ],
+   "search_px": 100,
+   "rotation_list": [
+    -100,
+    -96,
+    -92,
+    -88,
+    -84,
+    -80,
+    80,
+    84,
+    88,
+    92,
+    96,
+    100
+   ],
+   "exclude": [
+    [
+     820,
+     183,
+     1090,
+     900
+    ]
+   ],
+   "labels": "Thick solid line: private waterway structure limit (measured from mean high water mark). Thick dashed line: new private waterway structures discouraged. The map is drawn turned sideways (north is not up)."
+  },
+  {
+   "id": "river-rear-building-limit-berowra-waters",
+   "page": 373,
+   "figure": "8.1-b",
+   "title": "Rear building limit, Berowra Waters",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "river-rear-building-limit-calabash-point",
+   "page": 374,
+   "figure": "8.1-c",
+   "title": "Rear building limit, Calabash Point",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "river-rear-building-limit-coba-point",
+   "page": 375,
+   "figure": "8.1-d",
+   "title": "Rear building limit, Coba Point",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "river-rear-building-limit-marra-marra-creek",
+   "page": 376,
+   "figure": "8.1-e",
+   "title": "Rear building limit, Marra Marra Creek",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "river-rear-building-limit-milsons-passage",
+   "page": 377,
+   "figure": "8.1-f",
+   "title": "Rear building limit, Milsons Passage",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "river-rear-building-limit-neverfail-bay",
+   "page": 378,
+   "figure": "8.1-g",
+   "title": "Rear building limit, Neverfail Bay",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "river-rear-building-limit-sunny-corner",
+   "page": 379,
+   "figure": "8.1-h",
+   "title": "Rear building limit, Sunny Corner",
+   "group": "river-settlements",
+   "method": "anchor",
+   "skip": "no street names: only waterway names and lot numbers. NSW place points (e.g. Coba Point) give no scale or rotation. The lot numbers printed on the map let the AI find a lot by reading it."
+  },
+  {
+   "id": "sepp-maroota",
+   "page": 99,
+   "figure": "2.5-a",
+   "title": "Resources and Energy SEPP locality, Maroota",
+   "group": "state-policy",
+   "method": "anchor",
+   "skip": "a State policy map; applies only to extractive industry proposals. Not calibrated."
   }
  ]
 }

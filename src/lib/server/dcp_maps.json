@@ -660,6 +660,584 @@
      "metres_per_px": 1.0
     }
    }
+  },
+  {
+   "id": "setback-berowra-heights",
+   "page": 219,
+   "figure": "4.2-b",
+   "title": "Berowra Heights centre setbacks",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    94,
+    183,
+    940,
+    819
+   ],
+   "transform": {
+    "ax": 145764.379752,
+    "cx": -22029967.110133,
+    "by": -173858.08523,
+    "dy": -5843304.731564
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.593,
+    "same_shifted_25px": 0.351,
+    "lots": 2479,
+    "metres_per_px": 0.64,
+    "anchor_moved_px": [
+     44,
+     32
+    ]
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-dural-service-centre",
+   "page": 219,
+   "figure": "4.2-c",
+   "title": "Dural Service Centre setbacks",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    94,
+    870,
+    940,
+    1538
+   ],
+   "transform": {
+    "ax": 88700.450668,
+    "cx": -13396151.009093,
+    "by": -105895.481565,
+    "dy": -3567114.488384
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.905,
+    "same_shifted_25px": 0.474,
+    "lots": 2505,
+    "metres_per_px": 1.04,
+    "anchor_moved_px": [
+     6,
+     -11
+    ]
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-hornsby-bridge-road",
+   "page": 220,
+   "figure": "4.2-d",
+   "title": "Hornsby (Bridge Road) setbacks",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    97,
+    186,
+    927,
+    846
+   ],
+   "transform": {
+    "ax": 180341.25778,
+    "cx": -27248974.152026,
+    "by": -215316.464901,
+    "dy": -7255413.349079
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.702,
+    "same_shifted_25px": 0.45,
+    "lots": 4515,
+    "metres_per_px": 0.51,
+    "anchor_moved_px": [
+     -30,
+     -1
+    ]
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-hornsby-romsey-street",
+   "page": 220,
+   "figure": "4.2-e",
+   "title": "Hornsby (Romsey Street) setbacks",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    95,
+    895,
+    937,
+    1568
+   ],
+   "transform": {
+    "ax": 372480.218387,
+    "cx": -56282226.270105,
+    "by": -444747.357458,
+    "dy": -14989443.239457
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.469,
+    "same_shifted_25px": 0.103,
+    "lots": 399,
+    "metres_per_px": 0.25,
+    "anchor_moved_px": [
+     11,
+     -23
+    ]
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-pennant-hills",
+   "page": 221,
+   "figure": "4.2-f",
+   "title": "Pennant Hills centre setbacks",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    94,
+    183,
+    1144,
+    1023
+   ],
+   "transform": {
+    "ax": 92963.46419,
+    "cx": -14043491.981747,
+    "by": -111042.662937,
+    "dy": -3745773.640489
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.784,
+    "same_shifted_25px": 0.648,
+    "lots": 1923,
+    "metres_per_px": 1.0,
+    "anchor_moved_px": [
+     -11,
+     3
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-thornleigh",
+   "page": 222,
+   "figure": "4.2-g",
+   "title": "Thornleigh centre setbacks (Section 4.4 controls supersede this diagram where they conflict)",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    97,
+    209,
+    1085,
+    1578
+   ],
+   "transform": {
+    "ax": 111801.840996,
+    "cx": -16890693.891753,
+    "by": -133525.853062,
+    "dy": -4502664.689454
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.721,
+    "same_shifted_25px": 0.527,
+    "lots": 3120,
+    "metres_per_px": 0.83,
+    "anchor_moved_px": [
+     5,
+     32
+    ]
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "setback-waitara",
+   "page": 223,
+   "figure": "4.2-h",
+   "title": "Waitara centre setbacks",
+   "group": "centre-setbacks",
+   "method": "anchor",
+   "frame": [
+    94,
+    183,
+    1144,
+    983
+   ],
+   "transform": {
+    "ax": 127053.565573,
+    "cx": -19197390.95481,
+    "by": -151712.011855,
+    "dy": -5113591.049112
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.631,
+    "same_shifted_25px": 0.376,
+    "lots": 3095,
+    "metres_per_px": 0.73,
+    "anchor_moved_px": [
+     -24,
+     24
+    ]
+   },
+   "labels": "Red lines are the required building setbacks; the number next to each line is the setback in metres."
+  },
+  {
+   "id": "mu-bouvardia-asquith",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Bouvardia Street, Asquith",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    97,
+    789,
+    478,
+    1119
+   ],
+   "transform": {
+    "ax": 167602.271127,
+    "cx": -25325474.139116,
+    "by": -200080.948302,
+    "dy": -6739535.186023
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.941,
+    "same_shifted_25px": 0.331,
+    "lots": 844,
+    "metres_per_px": 0.55,
+    "anchor_moved_px": [
+     -1,
+     -14
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply."
+  },
+  {
+   "id": "mu-palmerston-waitara",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Palmerston Road, Waitara",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    97,
+    1175,
+    480,
+    1493
+   ],
+   "transform": {
+    "ax": 156628.918317,
+    "cx": -23667864.269753,
+    "by": -187019.91311,
+    "dy": -6302426.676291
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.971,
+    "same_shifted_25px": 0.438,
+    "lots": 961,
+    "metres_per_px": 0.59,
+    "anchor_moved_px": [
+     -24,
+     44
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply."
+  },
+  {
+   "id": "mu-normanhurst-road",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Normanhurst Road, Normanhurst",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    659,
+    253,
+    1054,
+    531
+   ],
+   "transform": {
+    "ax": 143287.54874,
+    "cx": -21649382.82663,
+    "by": -171118.612756,
+    "dy": -5769933.549303
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.98,
+    "same_shifted_25px": 0.478,
+    "lots": 859,
+    "metres_per_px": 0.65,
+    "anchor_moved_px": [
+     -43,
+     -40
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply."
+  },
+  {
+   "id": "mu-thompsons-corner",
+   "page": 245,
+   "figure": "4.4-a",
+   "title": "Mixed use precinct: Thompsons Corner, West Pennant Hills",
+   "group": "mixed-use",
+   "method": "anchor",
+   "frame": [
+    659,
+    917,
+    1054,
+    1201
+   ],
+   "transform": {
+    "ax": 138897.676151,
+    "cx": -20979691.602992,
+    "by": -165927.081067,
+    "dy": -5598478.761516
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.982,
+    "same_shifted_25px": 0.731,
+    "lots": 789,
+    "metres_per_px": 0.67,
+    "anchor_moved_px": [
+     -44,
+     0
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "The red hatched outline marks the mixed use precinct where Section 4.4 controls apply."
+  },
+  {
+   "id": "htc-heritage-facade-retention",
+   "page": 284,
+   "figure": "4.5-l",
+   "title": "Hornsby Town Centre: heritage and facade retention (Western Heritage Precinct)",
+   "group": "town-centre",
+   "method": "anchor",
+   "frame": [
+    94,
+    183,
+    1066,
+    1407
+   ],
+   "transform": {
+    "ax": 255624.519955,
+    "cx": -38623647.20135,
+    "by": -305206.43207,
+    "dy": -10285659.399005
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.685,
+    "same_shifted_25px": 0.4,
+    "lots": 1748,
+    "metres_per_px": 0.36,
+    "anchor_moved_px": [
+     10,
+     13
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "Dark purple = significant heritage item; light purple = other heritage items; yellow dashed line = preferred retention of building facade."
+  },
+  {
+   "id": "htc-west-heritage-ground-setbacks",
+   "page": 292,
+   "figure": "4.5-q",
+   "title": "Hornsby Town Centre: primary ground floor setbacks (Western Heritage Precinct)",
+   "group": "town-centre",
+   "method": "anchor",
+   "frame": [
+    95,
+    184,
+    1145,
+    1514
+   ],
+   "transform": {
+    "ax": 273810.983485,
+    "cx": -41371514.071507,
+    "by": -326920.411805,
+    "dy": -11017456.592433
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.608,
+    "same_shifted_25px": 0.296,
+    "lots": 2055,
+    "metres_per_px": 0.34,
+    "anchor_moved_px": [
+     2,
+     -15
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "Coloured lines are ground floor setbacks: dark purple 0 m build to line; mid purple 0 m mixed use ground floor; light purple 3 m residential ground floor; green-yellow 3 m; teal 6 m (interface with residential zoning)."
+  },
+  {
+   "id": "htc-west-heritage-podium",
+   "page": 294,
+   "figure": "4.5-s",
+   "title": "Hornsby Town Centre: above-podium setbacks and podium heights (Western Heritage Precinct)",
+   "group": "town-centre",
+   "method": "anchor",
+   "frame": [
+    95,
+    184,
+    1145,
+    1656
+   ],
+   "transform": {
+    "ax": 314105.117026,
+    "cx": -47459824.398715,
+    "by": -375030.15,
+    "dy": -12638815.856918
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.558,
+    "same_shifted_25px": 0.307,
+    "lots": 2405,
+    "metres_per_px": 0.29,
+    "anchor_moved_px": [
+     11,
+     16
+    ],
+    "rotation_deg": 0
+   },
+   "labels": "Solid lines show podium height: yellow 2 storeys, green 3 storeys, purple 5 storeys. Dashed lines are the setback line for the tower element, with the setback in metres written beside them."
+  },
+  {
+   "id": "industrial-habitat-asquith",
+   "page": 322,
+   "figure": "5.1-c",
+   "title": "Potentially significant flora and fauna habitat, industrial land at Asquith/Hornsby",
+   "group": "industrial",
+   "method": "anchor",
+   "frame": [
+    94,
+    944,
+    1099,
+    1534
+   ],
+   "transform": {
+    "ax": 93561.480078,
+    "bx": -1949.719169,
+    "cx": -14203623.550999,
+    "ay": -1633.12171,
+    "by": -111699.336363,
+    "dy": -3515563.828023
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.982,
+    "same_shifted_25px": 0.291,
+    "lots": 6827,
+    "metres_per_px": 0.99,
+    "anchor_moved_px": [
+     124,
+     26
+    ],
+    "rotation_deg": -1.0
+   },
+   "labels": "Olive-green shading marks potentially significant flora and fauna habitat on industrial zoned land."
+  },
+  {
+   "id": "river-jetty-brooklyn-1",
+   "page": 389,
+   "figure": "8.2-c",
+   "title": "Brooklyn jetty limits (north)",
+   "group": "river-settlements",
+   "method": "anchor",
+   "frame": [
+    98,
+    186,
+    1069,
+    1620
+   ],
+   "transform": {
+    "ax": -3657.27313,
+    "bx": -249716.877635,
+    "cx": -7823500.339181,
+    "ay": -209525.037308,
+    "by": 4358.824313,
+    "dy": 31831439.107246
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.495,
+    "same_shifted_25px": 0.223,
+    "lots": 160,
+    "metres_per_px": 0.44,
+    "anchor_moved_px": [
+     68,
+     26
+    ],
+    "rotation_deg": -91.0
+   },
+   "labels": "The thick dashed line is the jetty limit: private jetties and waterway structures may not extend beyond it. The map is drawn turned sideways (north is not up); lot numbers are printed in each lot."
+  },
+  {
+   "id": "river-jetty-brooklyn-2",
+   "page": 390,
+   "figure": "8.2-d",
+   "title": "Brooklyn jetty limits (south)",
+   "group": "river-settlements",
+   "method": "anchor",
+   "frame": [
+    95,
+    183,
+    1128,
+    1623
+   ],
+   "transform": {
+    "ax": -4590.715552,
+    "bx": -208944.803514,
+    "cx": -6315089.572064,
+    "ay": -175312.35401,
+    "by": 5471.412237,
+    "dy": 26692527.884507
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.485,
+    "same_shifted_25px": 0.33,
+    "lots": 172,
+    "metres_per_px": 0.53,
+    "anchor_moved_px": [
+     68,
+     -1
+    ],
+    "rotation_deg": -91.5
+   },
+   "labels": "The thick dashed line is the jetty limit: private jetties and waterway structures may not extend beyond it. The map is drawn turned sideways (north is not up); lot numbers are printed in each lot."
+  },
+  {
+   "id": "river-dangar-island",
+   "page": 388,
+   "figure": "8.2-b",
+   "title": "Dangar Island private waterway structure limits",
+   "group": "river-settlements",
+   "method": "anchor",
+   "frame": [
+    95,
+    183,
+    1090,
+    1591
+   ],
+   "transform": {
+    "ax": -1819.861266,
+    "bx": -124247.703706,
+    "cx": -3891342.250712,
+    "ay": -104259.782112,
+    "by": 2168.751735,
+    "dy": 15841869.085747
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 1.0,
+    "same_shifted_25px": 0.505,
+    "lots": 277,
+    "metres_per_px": 0.89,
+    "anchor_moved_px": [
+     4,
+     3
+    ],
+    "rotation_deg": -91.0
+   },
+   "labels": "Thick solid line: private waterway structure limit (measured from mean high water mark). Thick dashed line: new private waterway structures discouraged. The map is drawn turned sideways (north is not up)."
   }
  ]
 }

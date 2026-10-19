@@ -115,16 +115,26 @@ State policy map.
 
 ## Calibration status
 
-Calibrated so far (`src/lib/server/dcp_maps.json`, made by `scripts/calibrate_maps.py` from `scripts/dcp_map_spec.json`),
-each checked by drawing NSW road centrelines over the picture:
+`src/lib/server/dcp_maps.json` holds the calibrated maps, made by `scripts/calibrate_maps.py` from
+`scripts/dcp_map_spec.json`. Every calibration was checked by drawing NSW road centrelines over the picture (the roads
+must run along the drawn streets). 39 of the 45 maps that need calibrating are done (the other 4 maps are defined by
+zone and need none):
 
-- All 6 heritage conservation area maps (section 2).
-- 15 of the 18 Hornsby Town Centre maps (section 3): all except Figures 4.5-l, 4.5-q and 4.5-s (PDF pages 284, 292,
-  294), which are zoomed-in views of the Western Heritage Precinct without the full Town Centre boundary.
+| Group | Calibrated | Not calibrated, and why |
+|---|---|---|
+| Heritage conservation areas (6) | all 6 | |
+| Hornsby Town Centre (18) | all 18 | |
+| Centre setbacks (7) | all 7 | |
+| Mixed use precincts (7) | 4: Bouvardia Street, Palmerston Road, Normanhurst Road, Thompsons Corner | Asquith Commercial Centre, Pennant Hills Road Thornleigh, Beecroft Heritage Precinct: the insets are small and blurry and the automatic fit did not line up |
+| Industrial habitat (2) | Asquith/Hornsby | Mount Kuring-gai: no street names or labels to start from |
+| River settlements (10) | Dangar Island, Brooklyn (2 maps) | The 7 rear building limit maps: only waterway names and lot numbers. The printed lot numbers still let the AI find a lot by reading the map. |
+| State policy (1) | | Maroota extractive industries map: applies only to extractive industry |
 
-Not yet calibrated: sections 4 to 8 (centre setbacks, mixed use precincts, industrial habitat, river settlements, the
-SEPP map) and the three Western Heritage Precinct close-ups.
+Methods: heritage maps fit the NSW conservation-area polygon onto the red outline; the others start from a road
+junction (or a known point such as a road crossing the railway, or the centre of Dangar Island) and search scale,
+position and, for maps drawn sideways, rotation, so that NSW lot boundaries land on the drawn lot lines. For the two
+Brooklyn maps the scale found matches the printed scale bar exactly.
 
-How the app uses them: heritage maps (only when NSW data puts the property in that area), the parking tier map and the
-precinct map go with the first message, with the property drawn as a magenta dot. Any other calibrated map is marked
-when a search returns its page.
+How the app uses them: area maps (the heritage map when NSW data puts the property in that area, the mixed use
+precinct maps, and the Town Centre parking tier and precinct maps) go with the first message, with the property drawn
+as a magenta dot. Any other calibrated map is marked when a search returns its page.

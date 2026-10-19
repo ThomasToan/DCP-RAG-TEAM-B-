@@ -155,6 +155,17 @@ Some DCP rules apply only inside a mapped area. Findings so far:
   checked against the marked maps by eye: 14 Hunter Street, Hornsby: Tier 1, Retail Core Precinct; 2 Bridge Road,
   Hornsby: Tier 2, Northern Employment Precinct; 30 Dural Street, Hornsby: Mount Errington Precinct, flagged as close
   to the boundary (NSW data agrees). The parking-tier questions cost about 18k input tokens each.
+- **Extended to 39 maps.** `docs/hornsby_dcp_maps.md` has the full status table: all 6 heritage, all 18 Town Centre, all
+  7 centre setback maps, 4 of 7 mixed use precincts, the Asquith industrial habitat map, Dangar Island and both Brooklyn
+  jetty maps (drawn sideways; the fitted scale matches the printed scale bar). Not calibrated, with reasons in the table:
+  3 blurry mixed use insets, Mount Kuring-gai habitat (no labels), the 7 river rear building limit maps (no streets;
+  the AI can still match the lot number it is given to the numbers printed on the map) and the Maroota State policy map.
+- **Address test (`node scripts/eval_maps.js 2 7`).** 23 random NSW address points across the 12 area maps; the expected
+  answer comes from the picture (flood fill from the dot / colour under the dot), and heritage answers are also checked
+  against NSW data. Run 1: the model was right on 21 of 22 (one mixed use dot just across Wattle Street, Asquith, called
+  inside); run 2 (same addresses): 22 of 22. The dot positions agreed with NSW on 11 of 11 heritage cases. Two checks
+  on the Normanhurst Road inset were scored wrong by the script and verified correct by eye: that outline runs off the
+  inset edge, which the flood fill reads as outside. About 2.7k input tokens per map image.
 
 Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
 first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model

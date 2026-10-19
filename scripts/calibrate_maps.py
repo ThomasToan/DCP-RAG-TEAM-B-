@@ -80,7 +80,8 @@ def lots_in(bbox):
 
 def road_paths(name, kind, near, radius_deg=0.02):
     lon, lat = near
-    d = arcgis(ROADS, {'where': f"roadnamebase='{name}' AND roadnametype='{kind}'",
+    kind_sql = f"roadnametype='{kind}'" if kind else 'roadnametype IS NULL'
+    d = arcgis(ROADS, {'where': f"roadnamebase='{name}' AND {kind_sql}",
                        'geometry': f'{lon - radius_deg},{lat - radius_deg},{lon + radius_deg},{lat + radius_deg}',
                        'geometryType': 'esriGeometryEnvelope', 'inSR': 4326, 'spatialRel': 'esriSpatialRelIntersects',
                        'outFields': 'roadnamebase', 'returnGeometry': 'true', 'outSR': 4326})
@@ -90,10 +91,10 @@ def road_paths(name, kind, near, radius_deg=0.02):
     return paths
 
 
-def intersection(a, b, near):
+def intersection(a, b, near, radius_deg=0.02):
     """Coordinates where two named roads meet: the closest pair of vertices (roads share a vertex at a junction)."""
-    pa = [pt for p in road_paths(*a, near) for pt in p]
-    pb = [pt for p in road_paths(*b, near) for pt in p]
+    pa = [pt for p in road_paths(*a, near, radius_deg) for pt in p]
+    pb = [pt for p in road_paths(*b, near, radius_deg) for pt in p]
     k = math.cos(math.radians(near[1]))
     best = min(((x, y) for x in pa for y in pb), key=lambda xy: ((xy[0][0] - xy[1][0]) * k) ** 2 + (xy[0][1] - xy[1][1]) ** 2)
     gap_m = math.hypot((best[0][0] - best[1][0]) * k * 111320, (best[0][1] - best[1][1]) * M_PER_DEG_LAT)
@@ -110,7 +111,15 @@ def transform_from(s, tx, ty, lonc, latc):
 
 
 def to_px(t, lon, lat):
-    return t['ax'] * lon + t['cx'], t['by'] * lat + t['dy']
+    """General affine; bx and ay are 0 for north-up maps and only present for rotated ones."""
+    return t['ax'] * lon + t.get('bx', 0) * lat + t['cx'], t.get('ay', 0) * lon + t['by'] * lat + t['dy']
+
+
+def from_px(t, x, y):
+    a, b, c, d = t['ax'], t.get('bx', 0), t.get('ay', 0), t['by']
+    det = a * d - b * c
+    u, v = x - t['cx'], y - t['dy']
+    return (d * u - b * v) / det, (-c * u + a * v) / det
 
 
 def densify(rings, step_deg):
@@ -195,7 +204,7 @@ def outline_points_from(ref, ref_img):
             if any(e[0] <= x < e[2] and e[1] <= y < e[3] for e in ref.get('exclude', [])):
                 continue
             if max(px[x, y]) < 60:
-                pts.append(((x - t['cx']) / t['ax'], (y - t['dy']) / t['by']))
+                pts.append(from_px(t, x, y))
     return pts
 
 
@@ -284,11 +293,69 @@ def refine_on_cadastre(img, frame, t0, exclude=()):
                'metres_per_px': round(1 / s, 2)}
 
 
+def fit_anchor(img, frame, anchor, apx, mpp_range, search_px=60, exclude=(), rotations=(0,)):
+    """One known point (anchor lon/lat at roughly pixel apx) and a range of possible scales: search scale and position so
+    NSW lot boundaries land on the drawn lot lines. Needs numpy (run in the WSL venv)."""
+    import numpy as np
+    mask = np.array(line_mask(img, frame, exclude)) > 0
+    x0, y0, x1, y1 = frame
+    lon_a, lat_a = anchor
+    kx, ky = 111320 * math.cos(math.radians(lat_a)), M_PER_DEG_LAT
+    lo, hi = mpp_range
+    fx = max(apx[0] - x0, x1 - apx[0]) + search_px + 20
+    fy = max(apx[1] - y0, y1 - apx[1]) + search_px + 20
+    if any(rotations):
+        fx = fy = max(fx, fy)
+    rings = lots_in((lon_a - fx * hi / kx, lat_a - fy * hi / ky, lon_a + fx * hi / kx, lat_a + fy * hi / ky))
+    pts = np.array(densify(rings, 1.5 * lo / ky))
+    dX, dY = (pts[:, 0] - lon_a) * kx, -(pts[:, 1] - lat_a) * ky
+    rng = np.random.default_rng(0)
+
+    def evaluate(s, offsets, n, rot=0.0):
+        c, sn = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+        px, py = apx[0] + s * (c * dX - sn * dY), apx[1] + s * (sn * dX + c * dY)
+        inside = (px > x0 + search_px) & (px < x1 - search_px) & (py > y0 + search_px) & (py < y1 - search_px)
+        idx = np.flatnonzero(inside)
+        if len(idx) < 200:
+            return []
+        idx = rng.choice(idx, min(n, len(idx)), replace=False)
+        xi, yi = px[idx].astype(int), py[idx].astype(int)
+        return [(mask[yi + dy, xi + dx].mean(), dx, dy) for dx, dy in offsets]
+
+    scales = [1 / (lo * (hi / lo) ** (i / 59)) for i in range(60)]
+    step = 4 if len(rotations) == 1 else 8
+    coarse = [(dx, dy) for dx in range(-search_px, search_px + 1, step) for dy in range(-search_px, search_px + 1, step)]
+    best = (-1, None, 0, 0, 0)
+    for rot in rotations:
+        for s in scales:
+            for sc, dx, dy in evaluate(s, coarse, 2000, rot):
+                if sc > best[0]:
+                    best = (sc, s, dx, dy, rot)
+    _, s1, dx1, dy1, r1 = best
+    best = (-1, s1, dx1, dy1, r1)
+    fine = [(dx1 + a, dy1 + b) for a in range(-step, step + 1) for b in range(-step, step + 1)]
+    rots = [r1] if len(rotations) == 1 else [r1 + 0.5 * k for k in range(-6, 7)]
+    for rot in rots:
+        for k in range(-12, 13):
+            s = s1 * (1 + 0.0025 * k)
+            for sc, dx, dy in evaluate(s, fine, 8000, rot):
+                if sc > best[0]:
+                    best = (sc, s, dx, dy, rot)
+    sc, s, dx, dy, rot = best
+    off = evaluate(s, [(dx + 25, dy + 25)], 12000, rot)[0][0]
+    c, sn = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+    ax, bx, ay, by = s * c * kx, s * sn * ky, s * sn * kx, -s * c * ky
+    t = {'ax': ax, 'bx': bx, 'cx': apx[0] + dx - ax * lon_a - bx * lat_a, 'ay': ay, 'by': by, 'dy': apx[1] + dy - ay * lon_a - by * lat_a}
+    if not rot:
+        t = {k: t[k] for k in ('ax', 'cx', 'by', 'dy')}
+    return t, {'lot_lines_on_drawn_lines': round(float(sc), 3), 'same_shifted_25px': round(float(off), 3), 'lots': len(rings),
+               'metres_per_px': round(1 / s, 2), 'anchor_moved_px': [int(dx), int(dy)], 'rotation_deg': rot}
+
+
 def frame_bbox(t, frame):
     x0, y0, x1, y1 = frame
-    lon0, lon1 = sorted([(x0 - t['cx']) / t['ax'], (x1 - t['cx']) / t['ax']])
-    lat0, lat1 = sorted([(y0 - t['dy']) / t['by'], (y1 - t['dy']) / t['by']])
-    return lon0, lat0, lon1, lat1
+    corners = [from_px(t, x, y) for x in (x0, x1) for y in (y0, y1)]
+    return min(c[0] for c in corners), min(c[1] for c in corners), max(c[0] for c in corners), max(c[1] for c in corners)
 
 
 def overlay(img, t, frame, path, extra_rings=()):
@@ -313,6 +380,9 @@ def main():
         previous = {e['id']: e for e in json.load(open(OUT, encoding='utf-8'))['maps']}
     out = []
     for m in spec['maps']:
+        if m.get('skip'):
+            print(f"p{m['page']} {m['id']}: skipped ({m['skip']})")
+            continue
         if only and m['id'] not in only:
             if m['id'] in previous:
                 out.append(previous[m['id']])
@@ -320,7 +390,23 @@ def main():
         img = Image.open(f"{PAGES}/p{m['page']:04d}.png").convert('RGB')
         frame = tuple(m['frame'])
         extra = ()
-        if m['method'] == 'outline_from':
+        if m['method'] == 'anchor':
+            # first anchor that resolves: a road junction, or coordinates given directly (e.g. a road over a railway)
+            an = lonlat = None
+            for an in ([m['anchor']] + m.get('fallback_anchors', [])):
+                try:
+                    lonlat = tuple(an['lonlat']) if 'lonlat' in an else intersection(tuple(an['a']), tuple(an['b']), tuple(m['near']), m.get('near_radius', 0.06))
+                    break
+                except RuntimeError as e:
+                    print(f"p{m['page']} {m['id']}: anchor skipped: {e}")
+            if lonlat is None:
+                print(f"p{m['page']} {m['id']}: NOT CALIBRATED (no anchor resolved)")
+                continue
+            rot = m.get('rotation_deg', [0, 0, 1])
+            rots = tuple(m['rotation_list']) if 'rotation_list' in m else tuple(range(rot[0], rot[1] + 1, rot[2]))
+            t, fit = fit_anchor(img, frame, lonlat, tuple(an['px']), tuple(m['mpp']), m.get('search_px', 60),
+                                [tuple(e) for e in m.get('exclude', [])], rots)
+        elif m['method'] == 'outline_from':
             ref = next(e for e in out if e['id'] == m['ref'])
             ref_img = Image.open(f"{PAGES}/p{ref['page']:04d}.png").convert('RGB')
             pts = outline_points_from({**ref, 'exclude': next(x for x in spec['maps'] if x['id'] == m['ref']).get('exclude', [])}, ref_img)

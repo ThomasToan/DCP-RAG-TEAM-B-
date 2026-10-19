@@ -25,10 +25,15 @@ describe('the calibrated map registry', () => {
 		expect(MAPS.filter((m) => m.group === 'heritage')).toHaveLength(6);
 		expect(MAPS.filter((m) => m.group === 'town-centre').length).toBeGreaterThanOrEqual(15);
 		for (const m of MAPS) {
-			expect(Object.keys(m.transform).sort()).toEqual(['ax', 'by', 'cx', 'dy']);
+			const keys = Object.keys(m.transform).sort();
 			expect(m.frame).toHaveLength(4);
-			expect(m.transform.ax).toBeGreaterThan(0); // east is to the right
-			expect(m.transform.by).toBeLessThan(0); // north is up
+			if (keys.length === 4) {
+				expect(keys).toEqual(['ax', 'by', 'cx', 'dy']);
+				expect(m.transform.ax).toBeGreaterThan(0); // east is to the right
+				expect(m.transform.by).toBeLessThan(0); // north is up
+			} else {
+				expect(keys).toEqual(['ax', 'ay', 'bx', 'by', 'cx', 'dy']); // a map drawn rotated
+			}
 		}
 	});
 
@@ -40,6 +45,11 @@ describe('the calibrated map registry', () => {
 });
 
 describe('placing a property on a map', () => {
+	it('uses the rotation terms of a map drawn sideways', () => {
+		const m = { frame: [0, 0, 100, 100], transform: { ax: 0, bx: -10, cx: 50, ay: -10, by: 0, dy: 50 } };
+		expect(placeOnMap(m, { lon: 1, lat: 2 })).toMatchObject({ x: 30, y: 40 });
+	});
+
 	it('8 Killaloe Avenue lands inside the Beecroft-Cheltenham map where the trial put it', () => {
 		const placed = placeOnMap(byId('hca-beecroft-cheltenham'), KILLALOE);
 		expect(placed).not.toBeNull();
