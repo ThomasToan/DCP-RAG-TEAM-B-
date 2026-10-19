@@ -1,0 +1,665 @@
+{
+ "source": "scripts/calibrate_maps.py from scripts/dcp_map_spec.json",
+ "maps": [
+  {
+   "id": "hca-beecroft-cheltenham",
+   "page": 440,
+   "figure": "9.7-a",
+   "title": "Beecroft-Cheltenham Heritage Conservation Area",
+   "group": "heritage",
+   "method": "outline",
+   "frame": [
+    94,
+    184,
+    1090,
+    1601
+   ],
+   "transform": {
+    "ax": 26072.056995,
+    "cx": -3938142.987318,
+    "by": -31145.741291,
+    "dy": -1050098.864372
+   },
+   "fit": {
+    "outline_on_colour": 0.566,
+    "metres_per_px": 3.55,
+    "nsw_areas": [
+     "Beecroft, Cheltenham Heritage Conservation Area"
+    ]
+   },
+   "hca_ids": [
+    "C2"
+   ],
+   "labels": "Precinct names printed inside: Northern Triangle, Beecroft North, Beecroft Heritage Town Centre, Beecroft Cheltenham Plateau, The Gullies"
+  },
+  {
+   "id": "hca-hornsby-west-side",
+   "page": 449,
+   "figure": "9.8-a",
+   "title": "Hornsby West Side Heritage Conservation Area",
+   "group": "heritage",
+   "method": "outline",
+   "frame": [
+    94,
+    184,
+    1101,
+    1628
+   ],
+   "transform": {
+    "ax": 77512.696779,
+    "cx": -11711002.797401,
+    "by": -92548.82541,
+    "dy": -3118099.970365
+   },
+   "fit": {
+    "outline_on_colour": 0.696,
+    "metres_per_px": 1.19,
+    "nsw_areas": [
+     "Mount Errington Precinct, Hornsby West Side Heritage Conservation Area",
+     "Peats Ferry Road Precinct, Hornsby West Side Heritage Conservation Area",
+     "Pretoria Parade Precinct, Hornsby West Side Heritage Conservation Area"
+    ]
+   },
+   "hca_ids": [
+    "C3",
+    "C4",
+    "C5"
+   ],
+   "labels": "Precinct names printed inside: Peat Ferry Road Precinct, Mount Errington Precinct, Pretoria Parade Precinct"
+  },
+  {
+   "id": "hca-the-crescent",
+   "page": 456,
+   "figure": "9.9-a",
+   "title": "The Crescent, Pennant Hills Heritage Conservation Area",
+   "group": "heritage",
+   "method": "outline",
+   "frame": [
+    95,
+    184,
+    1180,
+    970
+   ],
+   "transform": {
+    "ax": 173551.117621,
+    "cx": -26218310.200493,
+    "by": -207304.698871,
+    "dy": -6993840.137424
+   },
+   "fit": {
+    "outline_on_colour": 0.744,
+    "metres_per_px": 0.53,
+    "nsw_areas": [
+     "The Crescent, Pennant Hills Heritage Conservation Area"
+    ]
+   },
+   "hca_ids": [
+    "C6"
+   ]
+  },
+  {
+   "id": "hca-wahroonga",
+   "page": 459,
+   "figure": "9.10-a",
+   "title": "Wahroonga Heritage Conservation Area",
+   "group": "heritage",
+   "method": "outline",
+   "frame": [
+    95,
+    184,
+    1180,
+    970
+   ],
+   "transform": {
+    "ax": 96692.131658,
+    "cx": -14610522.045623,
+    "by": -115465.208948,
+    "dy": -3892422.883796
+   },
+   "fit": {
+    "outline_on_colour": 0.882,
+    "metres_per_px": 0.96,
+    "nsw_areas": [
+     "Wahroonga Heritage Conservation Area"
+    ]
+   },
+   "hca_ids": [
+    "C7"
+   ]
+  },
+  {
+   "id": "hca-wahroonga-north",
+   "page": 462,
+   "figure": "9.11-a",
+   "title": "Wahroonga North Heritage Conservation Area",
+   "group": "heritage",
+   "method": "outline",
+   "frame": [
+    95,
+    184,
+    1180,
+    970
+   ],
+   "transform": {
+    "ax": 79791.651422,
+    "cx": -12056922.230147,
+    "by": -95278.09853,
+    "dy": -3211338.278603
+   },
+   "fit": {
+    "outline_on_colour": 0.828,
+    "metres_per_px": 1.16,
+    "nsw_areas": [
+     "Wahroonga North Heritage Conservation Area"
+    ]
+   },
+   "hca_ids": [
+    "C8"
+   ],
+   "labels": "Precinct names printed inside: Northern Precinct, Southern Precinct"
+  },
+  {
+   "id": "hca-barker-college",
+   "page": 465,
+   "figure": "9.12-a",
+   "title": "Barker College Heritage Conservation Area",
+   "group": "heritage",
+   "method": "outline",
+   "frame": [
+    95,
+    184,
+    1180,
+    970
+   ],
+   "transform": {
+    "ax": 96981.372323,
+    "cx": -14653320.542529,
+    "by": -115804.300975,
+    "dy": -3903350.186043
+   },
+   "fit": {
+    "outline_on_colour": 0.907,
+    "metres_per_px": 0.95,
+    "nsw_areas": [
+     "Barker College Heritage Conservation Area"
+    ]
+   },
+   "hca_ids": [
+    "C1"
+   ]
+  },
+  {
+   "id": "htc-active-frontages",
+   "page": 283,
+   "figure": "4.5-k",
+   "title": "Hornsby Town Centre: active frontages",
+   "group": "town-centre",
+   "method": "cadastre",
+   "frame": [
+    95,
+    184,
+    1145,
+    1419
+   ],
+   "transform": {
+    "ax": 85811.234096,
+    "cx": -12965390.078858,
+    "by": -102456.719885,
+    "dy": -3452314.293291
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.387,
+    "same_shifted_25px": 0.28,
+    "lots": 1434,
+    "metres_per_px": 1.08,
+    "rough_points": {
+     "points": 2,
+     "rms_px": 5.7,
+     "max_px": 5.7,
+     "metres_per_px": 1.14
+    }
+   },
+   "labels": "Orange lines mark the street edges where active frontages are required."
+  },
+  {
+   "id": "htc-building-height",
+   "page": 287,
+   "figure": "4.5-m",
+   "title": "Hornsby Town Centre: building height strategy (storeys per site)",
+   "group": "town-centre",
+   "method": "cadastre",
+   "frame": [
+    95,
+    184,
+    1145,
+    1561
+   ],
+   "transform": {
+    "ax": 90121.108919,
+    "cx": -13616649.88026,
+    "by": -107603.531324,
+    "dy": -3625751.666138
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.396,
+    "same_shifted_25px": 0.282,
+    "lots": 1596,
+    "metres_per_px": 1.03,
+    "rough_points": {
+     "points": 2,
+     "rms_px": 5.7,
+     "max_px": 5.7,
+     "metres_per_px": 1.14
+    }
+   }
+  },
+  {
+   "id": "htc-podium-heights",
+   "page": 290,
+   "figure": "4.5-o",
+   "title": "Hornsby Town Centre: podium heights",
+   "group": "town-centre",
+   "method": "cadastre",
+   "frame": [
+    95,
+    184,
+    1145,
+    1419
+   ],
+   "transform": {
+    "ax": 84359.700783,
+    "cx": -12746076.501405,
+    "by": -100723.62114,
+    "dy": -3393899.430121
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.438,
+    "same_shifted_25px": 0.316,
+    "lots": 1434,
+    "metres_per_px": 1.1,
+    "rough_points": {
+     "points": 2,
+     "rms_px": 5.7,
+     "max_px": 5.7,
+     "metres_per_px": 1.14
+    }
+   }
+  },
+  {
+   "id": "htc-primary-setbacks",
+   "page": 291,
+   "figure": "4.5-p",
+   "title": "Hornsby Town Centre: primary ground floor setbacks",
+   "group": "town-centre",
+   "method": "cadastre",
+   "frame": [
+    95,
+    184,
+    1145,
+    1466
+   ],
+   "transform": {
+    "ax": 84571.128604,
+    "cx": -12778023.084115,
+    "by": -100976.345805,
+    "dy": -3402373.983703
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.413,
+    "same_shifted_25px": 0.311,
+    "lots": 1485,
+    "metres_per_px": 1.1,
+    "rough_points": {
+     "points": 2,
+     "rms_px": 5.7,
+     "max_px": 5.7,
+     "metres_per_px": 1.14
+    }
+   }
+  },
+  {
+   "id": "htc-secondary-setbacks",
+   "page": 293,
+   "figure": "4.5-r",
+   "title": "Hornsby Town Centre: secondary above-podium setbacks",
+   "group": "town-centre",
+   "method": "cadastre",
+   "frame": [
+    95,
+    184,
+    1145,
+    1466
+   ],
+   "transform": {
+    "ax": 84993.984247,
+    "cx": -12841919.249535,
+    "by": -101481.227534,
+    "dy": -3419400.203621
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.418,
+    "same_shifted_25px": 0.302,
+    "lots": 1485,
+    "metres_per_px": 1.09,
+    "rough_points": {
+     "points": 2,
+     "rms_px": 5.7,
+     "max_px": 5.7,
+     "metres_per_px": 1.14
+    }
+   }
+  },
+  {
+   "id": "htc-access-routes",
+   "page": 300,
+   "figure": "4.5-t",
+   "title": "Hornsby Town Centre: access routes",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    94,
+    183,
+    1144,
+    1533
+   ],
+   "transform": {
+    "ax": 82053.990469,
+    "cx": -12397696.216527,
+    "by": -97970.39478,
+    "dy": -3301033.307433
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.462,
+    "same_shifted_25px": 0.353,
+    "lots": 1545,
+    "metres_per_px": 1.13,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.966,
+     "metres_per_px": 1.12
+    }
+   }
+  },
+  {
+   "id": "htc-public-parking",
+   "page": 301,
+   "figure": "4.5-u",
+   "title": "Hornsby Town Centre: public car parking",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    95,
+    183,
+    1145,
+    1413
+   ],
+   "transform": {
+    "ax": 88001.821322,
+    "cx": -13296402.237097,
+    "by": -105070.542568,
+    "dy": -3540232.628981
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.405,
+    "same_shifted_25px": 0.299,
+    "lots": 1277,
+    "metres_per_px": 1.05,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.35,
+     "metres_per_px": 1.05
+    }
+   }
+  },
+  {
+   "id": "htc-awnings",
+   "page": 303,
+   "figure": "4.5-v",
+   "title": "Hornsby Town Centre: awnings",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    94,
+    183,
+    1141,
+    1527
+   ],
+   "transform": {
+    "ax": 85053.27614,
+    "cx": -12850881.833786,
+    "by": -101550.923082,
+    "dy": -3421662.870951
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.363,
+    "same_shifted_25px": 0.264,
+    "lots": 1434,
+    "metres_per_px": 1.09,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.995,
+     "metres_per_px": 1.09
+    }
+   }
+  },
+  {
+   "id": "htc-traffic-projects",
+   "page": 309,
+   "figure": "4.5-bb",
+   "title": "Hornsby Town Centre: traffic management projects",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    94,
+    183,
+    1156,
+    1569
+   ],
+   "transform": {
+    "ax": 82713.463123,
+    "cx": -12497335.060443,
+    "by": -98757.522929,
+    "dy": -3327523.003366
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.431,
+    "same_shifted_25px": 0.346,
+    "lots": 1560,
+    "metres_per_px": 1.12,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.934,
+     "metres_per_px": 1.11
+    }
+   }
+  },
+  {
+   "id": "htc-parking-tiers",
+   "page": 37,
+   "figure": "1.3-b",
+   "title": "Hornsby Town Centre: parking rate tiers (Tier 1 / Tier 2)",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    94,
+    183,
+    616,
+    843
+   ],
+   "transform": {
+    "ax": 57581.591142,
+    "cx": -8700197.896928,
+    "by": -68749.950577,
+    "dy": -2316471.992688
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.85,
+    "same_shifted_25px": 0.662,
+    "lots": 788,
+    "metres_per_px": 1.61,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.958,
+     "metres_per_px": 1.61
+    }
+   },
+   "labels": "Labels printed on the map: TIER 1 (inside the blue outline), TIER 2 (inside the black outlines). Parking rates for each tier are in Table 1.3.2-d on the same page."
+  },
+  {
+   "id": "htc-precincts",
+   "page": 272,
+   "figure": "4.5-a",
+   "title": "Hornsby Town Centre: Town Centre boundary and planning precincts",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    95,
+    385,
+    1059,
+    1564
+   ],
+   "transform": {
+    "ax": 105510.688077,
+    "cx": -15941976.9347,
+    "by": -125975.277657,
+    "dy": -4244603.28159
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.502,
+    "same_shifted_25px": 0.341,
+    "lots": 770,
+    "metres_per_px": 0.88,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.955,
+     "metres_per_px": 0.88
+    }
+   },
+   "labels": "Precinct colours (legend at top left): red Western Heritage, orange Northern Employment, purple Central Heart, blue Retail Core, grey Transport Corridor; plus a brown-red precinct, Central North (Figure 4.5-e)."
+  },
+  {
+   "id": "htc-gateways",
+   "page": 281,
+   "figure": "4.5-i",
+   "title": "Hornsby Town Centre: gateways, arrival and feature points",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    95,
+    184,
+    1145,
+    1419
+   ],
+   "transform": {
+    "ax": 100906.585325,
+    "cx": -15246214.210277,
+    "by": -120477.92055,
+    "dy": -4059486.359106
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.517,
+    "same_shifted_25px": 0.381,
+    "lots": 961,
+    "metres_per_px": 0.92,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.956,
+     "metres_per_px": 0.92
+    }
+   }
+  },
+  {
+   "id": "htc-view-corridors",
+   "page": 282,
+   "figure": "4.5-j",
+   "title": "Hornsby Town Centre: view corridors",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    94,
+    183,
+    1141,
+    1635
+   ],
+   "transform": {
+    "ax": 118555.645876,
+    "cx": -17913076.653899,
+    "by": -141550.821113,
+    "dy": -4769629.47842
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.532,
+    "same_shifted_25px": 0.336,
+    "lots": 831,
+    "metres_per_px": 0.78,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.954,
+     "metres_per_px": 0.78
+    }
+   }
+  },
+  {
+   "id": "htc-movement-place",
+   "page": 307,
+   "figure": "4.5-aa",
+   "title": "Hornsby Town Centre: movement and place",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    95,
+    184,
+    1083,
+    1334
+   ],
+   "transform": {
+    "ax": 83385.416517,
+    "cx": -12598891.675666,
+    "by": -99558.380916,
+    "dy": -3354505.767801
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.587,
+    "same_shifted_25px": 0.481,
+    "lots": 1251,
+    "metres_per_px": 1.11,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.956,
+     "metres_per_px": 1.11
+    }
+   }
+  },
+  {
+   "id": "htc-open-space",
+   "page": 311,
+   "figure": "4.5-cc",
+   "title": "Hornsby Town Centre: open space",
+   "group": "town-centre",
+   "method": "outline_from",
+   "frame": [
+    94,
+    183,
+    870,
+    1227
+   ],
+   "transform": {
+    "ax": 92614.852051,
+    "cx": -13993584.976409,
+    "by": -110578.309034,
+    "dy": -3725980.864919
+   },
+   "fit": {
+    "lot_lines_on_drawn_lines": 0.633,
+    "same_shifted_25px": 0.449,
+    "lots": 727,
+    "metres_per_px": 1.0,
+    "from_outline_of": "htc-active-frontages",
+    "outline_fit": {
+     "outline_on_colour": 0.954,
+     "metres_per_px": 1.0
+    }
+   }
+  }
+ ]
+}
