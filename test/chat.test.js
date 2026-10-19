@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { PNG } from 'pngjs';
 import { answerQuestion, describeFacts, citedPageNumbers, TOOLS, SYSTEM_PROMPT, MAX_ROUNDS, MAX_SEARCHES, CLAUSES_PROMPT, CLAUSES_QUESTION, CLAUSES_MAX_SEARCHES, CLAUSES_MAX_ROUNDS } from '../src/lib/server/chat.js';
 
 // A real-shaped facts bundle (what property.js returns) for a Hornsby lot
@@ -336,5 +337,60 @@ ${CLAUSES_PROMPT}`);
 	it('asks for the section layout the page can render (headings and flat bullets)', () => {
 		for (const h of ['Development types and their DCP controls', 'overlays', 'depend on a DCP map', 'Not found']) expect(CLAUSES_PROMPT).toContain(h);
 		expect(CLAUSES_PROMPT).toMatch(/flat "- " bullets only/);
+	});
+});
+
+describe('marked DCP maps: the property drawn as a dot on calibrated map pages', () => {
+	const realPng = () => {
+		const png = new PNG({ width: 40, height: 40 });
+		png.data.fill(255);
+		return PNG.sync.write(png).toString('base64');
+	};
+	const pngImage = async (page) => ({ mime: 'image/png', base64: realPng(), page });
+	const MAP = { id: 'hca-test', page: 440, figure: '9.7-a', title: 'Test HCA', group: 'heritage', frame: [0, 0, 40, 40], transform: { ax: 1, cx: 0, by: -1, dy: 0 }, fit: { metres_per_px: 1 } };
+	const placed = { map: MAP, x: 20, y: 20 };
+
+	it('area maps go with the first message, marked, and count as retrieved and already shown', async () => {
+		const ai = fakeOpenAI(toolResp('heritage controls'), finalResp('In the Northern Triangle (PDF page 440).'));
+		const search = fakeSearch([{ page: 440, score: 0.6, chunk: 0 }]);
+		const r = await answerQuestion({ facts: FACTS, question: 'Which precinct?' }, deps(ai, search, { loadImage: pngImage, areaMaps: () => [placed], mapAt: () => null }));
+		const first = ai.calls[0].input[0].content;
+		expect(first[1].text).toMatch(/^DCP MAP CHECK, PDF page 440 .*MAGENTA DOT marks this property/);
+		expect(first[2].type).toBe('input_image');
+		expect(first[2].image_url).not.toContain(realPng()); // the image was changed: the dot is on it
+		expect(r.mapChecks).toEqual([{ page: 440, figure: '9.7-a', map: 'hca-test' }]);
+		expect(r.pages.map((p) => p.page)).toContain(440);
+		expect(r.warnings).toEqual([]); // citing the map page is supported
+		const out = JSON.parse(ai.calls[1].input.find((i) => i.type === 'function_call_output').output);
+		expect(out.already_shown_earlier).toEqual([440]); // not sent a second time
+	});
+
+	it('a follow-up does not resend area maps', async () => {
+		const ai = fakeOpenAI(finalResp('ok'));
+		let asked = 0;
+		await answerQuestion({ facts: FACTS, question: 'and?', previousResponseId: 'resp_prev' }, deps(ai, fakeSearch(), { areaMaps: () => (asked++, [placed]) }));
+		expect(asked).toBe(0);
+		expect(ai.calls[0].input[0].content).toHaveLength(1);
+	});
+
+	it('a searched page that is a calibrated map comes back marked, with the note', async () => {
+		const ai = fakeOpenAI(toolResp('parking tiers'), finalResp('done'));
+		await answerQuestion({ facts: FACTS, question: 'parking?' }, deps(ai, fakeSearch([{ page: 37, score: 0.7, chunk: 0 }]), { loadImage: pngImage, areaMaps: () => [], mapAt: (page) => (page === 37 ? { ...placed, map: { ...MAP, page: 37, figure: '1.3-b' } } : null) }));
+		const imgMsg = ai.calls[1].input.find((i) => i.role === 'user');
+		expect(imgMsg.content[0].text).toMatch(/^PDF page 37 of the .* \(MARKED MAP\): Figure 1\.3-b/);
+	});
+
+	it('a map image that cannot be decoded is skipped for the first message and sent plain after a search', async () => {
+		const ai = fakeOpenAI(toolResp('x'), finalResp('done'));
+		const r = await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai, fakeSearch([{ page: 37, score: 0.7, chunk: 0 }]), { areaMaps: () => [placed], mapAt: () => placed }));
+		expect(r.mapChecks).toEqual([]); // fakeImage is not a real PNG
+		expect(ai.calls[0].input[0].content).toHaveLength(1);
+		const imgMsg = ai.calls[1].input.find((i) => i.role === 'user');
+		expect(imgMsg.content[0].text).toMatch(/^PDF page 37 of the Hornsby Development Control Plan 2024:$/);
+	});
+
+	it('the system prompt tells the model how to read a marked map', () => {
+		expect(SYSTEM_PROMPT).toMatch(/MAGENTA DOT/);
+		expect(SYSTEM_PROMPT).toMatch(/on or very close to a boundary/);
 	});
 });

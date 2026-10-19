@@ -112,3 +112,19 @@ illustrations (273 to 276). All other figures are diagrams (setbacks, heights, r
 
 49 restriction maps: 4 defined by zone, 6 heritage areas with an NSW boundary, 38 that exist only in the DCP, and 1
 State policy map.
+
+## Calibration status
+
+Calibrated so far (`src/lib/server/dcp_maps.json`, made by `scripts/calibrate_maps.py` from `scripts/dcp_map_spec.json`),
+each checked by drawing NSW road centrelines over the picture:
+
+- All 6 heritage conservation area maps (section 2).
+- 15 of the 18 Hornsby Town Centre maps (section 3): all except Figures 4.5-l, 4.5-q and 4.5-s (PDF pages 284, 292,
+  294), which are zoomed-in views of the Western Heritage Precinct without the full Town Centre boundary.
+
+Not yet calibrated: sections 4 to 8 (centre setbacks, mixed use precincts, industrial habitat, river settlements, the
+SEPP map) and the three Western Heritage Precinct close-ups.
+
+How the app uses them: heritage maps (only when NSW data puts the property in that area), the parking tier map and the
+precinct map go with the first message, with the property drawn as a magenta dot. Any other calibrated map is marked
+when a search returns its page.

@@ -41,5 +41,6 @@ console.log(`--- searches the model ran (${r.rounds ?? 0} tool round${r.rounds =
 for (const t of r.toolCalls) console.log(`  "${t.query}" -> pages ${t.pages.join(', ') || 'none above the score floor'}`);
 console.log('\n--- answer ---\n' + r.answer);
 if (r.pages.length) console.log('\nretrieved pages: ' + r.pages.map((p) => `${p.page} (${p.score.toFixed(2)})`).join(', '));
+if (r.mapChecks?.length) console.log('marked maps sent with the question: ' + r.mapChecks.map((m) => `PDF page ${m.page} (Figure ${m.figure})`).join(', '));
 if (r.warnings.length) console.log('WARNINGS: ' + r.warnings.join(' | '));
 if (r.usage) console.log(`\n(${((Date.now() - t0) / 1000).toFixed(1)} s, ${r.usage.requests} model requests, tokens in/out TOTAL: ${r.usage.input_tokens}/${r.usage.output_tokens}, model ${model})`);

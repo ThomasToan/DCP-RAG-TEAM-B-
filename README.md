@@ -147,6 +147,14 @@ Some DCP rules apply only inside a mapped area. Findings so far:
   NOT independently verified. Limits: one map; only 2 outside addresses; the dots are drawn by our code from the
   calibration, so the model reads the picture but does not locate the address itself; this only works where a DCP outline
   matches an NSW polygon (heritage areas); the trial scripts were run in a scratch session and are not yet app code.
+- **Now in the app (21 maps).** `docs/hornsby_dcp_maps.md` lists all 49 restriction maps in the DCP. 21 are calibrated
+  (`scripts/calibrate_maps.py`): the 6 heritage maps by fitting the NSW polygon onto the red outline, and 15 Hornsby
+  Town Centre maps by fitting NSW lot boundaries onto the drawn lot lines. `src/lib/server/dcp_maps.js` draws the
+  property as a magenta dot; `chat.js` sends the area maps (heritage precinct, parking tiers, Town Centre precincts) with
+  the first message and marks any other calibrated map page a search returns. Live answers through the full app code,
+  checked against the marked maps by eye: 14 Hunter Street, Hornsby: Tier 1, Retail Core Precinct; 2 Bridge Road,
+  Hornsby: Tier 2, Northern Employment Precinct; 30 Dural Street, Hornsby: Mount Errington Precinct, flagged as close
+  to the boundary (NSW data agrees). The parking-tier questions cost about 18k input tokens each.
 
 Verified in the browser against the live stack (Postgres + full 489-page PixelRAG index + OpenAI), not just mocks: a
 first question, a follow-up in the same conversation, and an out-of-Hornsby address (correctly refused with no model
