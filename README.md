@@ -296,3 +296,19 @@ a property in any other council is refused before the model is called. Adding a 
   right Part first 8/12, top 3 11/12; nonsense at most 0.369, real at least 0.425, so the same 0.40 floor works. Live
   answer through the full code: 10 Marine Parade, Maroubra (R2, 498.1 m2), site coverage 50%, PDF page 359, clause
   2.4(a), checked against the page text.
+
+## Speed and accuracy improvements (free)
+
+- **Searches in parallel.** All searches the model asks for in one round, and all page images they return, now run at
+  the same time instead of one after another.
+- **Hybrid search.** `src/lib/server/text_search.js` ranks pages by their words (BM25 over the PDF text layer, extracted
+  by `scripts/extract_page_text.py` into `src/lib/server/page_text/`), and `searchPages` merges that ranking with the
+  image ranking (reciprocal rank fusion). The image score alone still decides "nothing in the DCP matches". Measured
+  with `node scripts/eval_search.js` (image only -> hybrid): Hornsby right page first 7 -> 8 of 11, right page among
+  the 4 sent 9 -> 10 of 11; Randwick 8 -> 9 of 12 and 11 -> 12 of 12. Small sets, so a modest but consistent gain.
+- **Fixed searches for "List applicable clauses".** `clauseTopics(facts)` picks the search topics from the zone and
+  overlays; the server runs them and sends up to 18 pages with the first message, and the model may add 2 searches.
+  Two runs on 8 Killaloe Avenue now get the same pages; 17 clause references appeared in both lists. Cost rose to about
+  110k input tokens per list (was about 65k).
+- **Fly health check.** Grace period raised from 45 s to 5 minutes, so Fly stops restarting the machine while the model
+  loads.

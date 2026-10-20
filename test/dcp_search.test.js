@@ -107,3 +107,31 @@ describe('loadPageImage', () => {
 		});
 	});
 });
+
+describe('hybrid search: image ranking merged with a keyword ranking of the page text', () => {
+	const hit = (page, score) => ({ url: `pages/hornsby/p${String(page).padStart(4, '0')}.png`, score, chunk_index: 0 });
+	const server = (hits) => async () => new Response(JSON.stringify({ results: [{ hits }] }));
+	const text = (pages) => () => pages.map((page, i) => ({ page, score: 10 - i }));
+
+	it('a page high in both lists comes first, and a keyword-only page can be sent', async () => {
+		const r = await searchPages('q', { fetch: server([hit(10, 0.6), hit(20, 0.55), hit(30, 0.5)]), searchText: text([20, 99]) });
+		expect(r.pages.map((p) => p.page)).toEqual([20, 10, 99, 30]);
+		expect(r.pages.find((p) => p.page === 20).foundBy).toBe('both');
+		expect(r.pages.find((p) => p.page === 99)).toMatchObject({ foundBy: 'text', score: 0 });
+	});
+
+	it('keyword matches never rescue a question whose best image score is under the floor', async () => {
+		const r = await searchPages('bake bread', { fetch: server([hit(10, 0.3)]), searchText: text([5, 6]) });
+		expect(r).toMatchObject({ pages: [], belowFloor: true, best: 0.3 });
+	});
+
+	it('hybrid: false gives the image ranking only', async () => {
+		const r = await searchPages('q', { fetch: server([hit(10, 0.6), hit(20, 0.55)]), searchText: text([99]), hybrid: false });
+		expect(r.pages.map((p) => p.page)).toEqual([10, 20]);
+	});
+
+	it('a keyword search failure falls back to the image ranking', async () => {
+		const r = await searchPages('q', { fetch: server([hit(10, 0.6)]), searchText: () => { throw new Error('no text'); } });
+		expect(r.pages.map((p) => p.page)).toEqual([10]);
+	});
+});

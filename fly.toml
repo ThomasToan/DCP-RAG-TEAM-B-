@@ -18,10 +18,10 @@ primary_region = "syd"
 	auto_stop_machines = "stop"
 	auto_start_machines = true
 	min_machines_running = 0
-	# a cold start takes ~25s (loading the model); give Fly time before it gives up on the
-	# health check and recycles the machine
+	# a cold start takes 2 to 3 minutes (loading the 4.3 GB model from disk; measured from the Fly logs). With a 45s
+	# grace period Fly marked the machine unhealthy while it was still loading and restarted it. 5 minutes covers it.
 	[[http_service.checks]]
-		grace_period = "45s"
+		grace_period = "300s"
 		interval = "15s"
 		timeout = "5s"
 		method = "GET"

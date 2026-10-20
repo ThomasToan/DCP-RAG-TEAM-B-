@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PNG } from 'pngjs';
 import { COUNCILS } from '../src/lib/server/councils.js';
-import { answerQuestion, describeFacts, citedPageNumbers, tools, systemPrompt, MAX_ROUNDS, MAX_SEARCHES, CLAUSES_PROMPT, CLAUSES_QUESTION, CLAUSES_MAX_SEARCHES, CLAUSES_MAX_ROUNDS } from '../src/lib/server/chat.js';
+import { answerQuestion, describeFacts, citedPageNumbers, tools, systemPrompt, MAX_ROUNDS, MAX_SEARCHES, CLAUSES_PROMPT, CLAUSES_QUESTION, CLAUSES_MAX_ROUNDS, CLAUSES_EXTRA_SEARCHES, clauseTopics } from '../src/lib/server/chat.js';
 
 // A real-shaped facts bundle (what property.js returns) for a Hornsby lot
 const HORNSBY = COUNCILS.find((c) => c.key === 'hornsby');
@@ -307,23 +307,57 @@ ${CLAUSES_PROMPT}`);
 		expect(ai.calls[0].instructions).not.toMatch(/LIST THE RELEVANT CLAUSES/);
 	});
 
-	it('allows more searches than a normal question, and tells the model so', async () => {
-		expect(CLAUSES_MAX_SEARCHES).toBeGreaterThan(MAX_SEARCHES);
+	it('the server runs the topic searches itself and sends their pages with the first message', async () => {
+		const ai = fakeOpenAI(finalResp('list'));
+		const search = fakeSearch([{ page: 112, score: 0.6, chunk: 0 }, { page: 115, score: 0.5, chunk: 0 }]);
+		const r = await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai, search));
+		expect(search.seen).toEqual(clauseTopics(FACTS));
+		const first = ai.calls[0].input[0].content;
+		expect(first.find((c) => c.type === 'input_text' && c.text.startsWith('DCP PAGES FOUND BY THE SERVER')).text).toContain(clauseTopics(FACTS)[0]);
+		expect(first.filter((c) => c.type === 'input_image')).toHaveLength(2); // each page sent once, although every topic found it
+		expect(r.toolCalls.every((t) => t.by === 'server')).toBe(true);
+		expect(r.pages.map((p) => p.page).sort()).toEqual([112, 115]);
+	});
+
+	it('the model may add only a couple of searches of its own, and is told so', async () => {
+		expect(CLAUSES_PROMPT).toContain(`up to ${CLAUSES_EXTRA_SEARCHES} more searches`);
 		expect(CLAUSES_MAX_ROUNDS).toBeGreaterThan(MAX_ROUNDS);
-		expect(CLAUSES_PROMPT).toContain(`search limit is ${CLAUSES_MAX_SEARCHES}`);
-		const six = { id: 'r1', output: Array.from({ length: 7 }, (_, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: `q${i}` }) })) };
-		const ai = fakeOpenAI(six, finalResp('done'));
+		const five = { id: 'r1', output: Array.from({ length: 5 }, (_, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: `extra${i}` }) })) };
+		const ai = fakeOpenAI(five, finalResp('done'));
 		const search = fakeSearch();
 		await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai, search));
-		expect(search.seen).toHaveLength(CLAUSES_MAX_SEARCHES); // the 7th is refused
+		expect(search.seen.filter((q) => q.startsWith('extra'))).toEqual(['extra0', 'extra1']);
+	});
+
+	it('the same facts always give the same topics', () => {
+		expect(clauseTopics(FACTS)).toEqual(clauseTopics({ ...FACTS }));
+	});
+
+	it('topics follow the zone and the overlays', () => {
+		const r2 = clauseTopics({ zone: 'R2', heritage: 'HCA', heritage_detail: [{ name: 'Beecroft, Cheltenham Heritage Conservation Area' }], bushfire: null, unknown: [] });
+		expect(r2[0]).toMatch(/dwelling house/);
+		expect(r2).toContain('dual occupancy controls');
+		expect(r2).toContain('heritage controls for Beecroft, Cheltenham Heritage Conservation Area');
+		expect(r2.some((t) => /bushfire/.test(t))).toBe(false);
+		const r4 = clauseTopics({ zone: 'R4', bushfire: 'Vegetation Buffer', unknown: ['flood'] });
+		expect(r4[0]).toMatch(/multi dwelling/);
+		expect(r4).toContain('bushfire prone land development controls');
+		expect(r4).toContain('flood prone land development controls'); // NOT KNOWN is searched, never assumed no
+		expect(clauseTopics({ zone: 'SP2', zone_name: 'Infrastructure' })[0]).toBe('development controls for the SP2 zone (Infrastructure)');
+	});
+
+	it('never more than 8 topics', () => {
+		const many = clauseTopics({ zone: 'R2', heritage: 'HCA', bushfire: 'x', flood: true, acid_sulfate: 'Class 5', terrestrial_biodiversity: true, foreshore: true, unknown: [] });
+		expect(many.length).toBeLessThanOrEqual(8);
 	});
 
 	it('an explicit maxSearches still wins', async () => {
 		const three = { id: 'r1', output: ['a', 'b', 'c'].map((q, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: q }) })) };
 		const ai = fakeOpenAI(three, finalResp('done'));
 		const search = fakeSearch();
-		await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai, search, { maxSearches: 2 }));
-		expect(search.seen).toEqual(['a', 'b']);
+		const topics = clauseTopics(FACTS).length;
+		await answerQuestion({ facts: FACTS, mode: 'clauses' }, deps(ai, search, { maxSearches: topics + 1 }));
+		expect(search.seen.slice(topics)).toEqual(['a']);
 	});
 
 	it('a property outside Hornsby never reaches the model in this mode either', async () => {
@@ -433,5 +467,27 @@ describe('more than one council: the DCP follows the property', () => {
 	it('each council has a distinct key, LGA and page count', () => {
 		expect(new Set(COUNCILS.map((c) => c.key)).size).toBe(COUNCILS.length);
 		expect(COUNCILS.find((c) => c.key === 'randwick')).toMatchObject({ lga: 'RANDWICK', pages: 1528 });
+	});
+});
+
+describe('speed: one round of searches runs at the same time', () => {
+	it('three searches in one round overlap, and their results keep the order the model asked for', async () => {
+		const three = { id: 'r1', output: ['a', 'b', 'c'].map((q, i) => ({ type: 'function_call', call_id: `c${i}`, name: 'search_dcp', arguments: JSON.stringify({ query: q }) })) };
+		const ai = fakeOpenAI(three, finalResp('done'));
+		let running = 0, most = 0;
+		const pagesFor = { a: 10, b: 20, c: 30 };
+		const search = async (q) => {
+			running++; most = Math.max(most, running);
+			await new Promise((r) => setTimeout(r, q === 'a' ? 30 : 5)); // the first one finishes last
+			running--;
+			return { pages: [{ page: pagesFor[q], score: 0.5, chunk: 0 }], belowFloor: false, best: 0.5 };
+		};
+		const r = await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai, search));
+		expect(most).toBe(3);
+		expect(r.toolCalls.map((t) => t.query)).toEqual(['a', 'b', 'c']);
+		const outs = ai.calls[1].input.filter((i) => i.type === 'function_call_output').map((o) => o.call_id);
+		expect(outs).toEqual(['c0', 'c1', 'c2']);
+		const labels = ai.calls[1].input.find((i) => i.role === 'user').content.filter((c) => c.type === 'input_text').map((c) => c.text);
+		expect(labels.map((t) => t.match(/PDF page (\d+)/)[1])).toEqual(['10', '20', '30']);
 	});
 });
