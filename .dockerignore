@@ -8,3 +8,5 @@ build
 .env
 .env.*
 data/dcp_raw
+# the source PDFs are not needed in the image (pages are already rendered)
+data/*/raw

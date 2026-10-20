@@ -1,8 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { PNG } from 'pngjs';
-import { answerQuestion, describeFacts, citedPageNumbers, TOOLS, SYSTEM_PROMPT, MAX_ROUNDS, MAX_SEARCHES, CLAUSES_PROMPT, CLAUSES_QUESTION, CLAUSES_MAX_SEARCHES, CLAUSES_MAX_ROUNDS } from '../src/lib/server/chat.js';
+import { COUNCILS } from '../src/lib/server/councils.js';
+import { answerQuestion, describeFacts, citedPageNumbers, tools, systemPrompt, MAX_ROUNDS, MAX_SEARCHES, CLAUSES_PROMPT, CLAUSES_QUESTION, CLAUSES_MAX_SEARCHES, CLAUSES_MAX_ROUNDS } from '../src/lib/server/chat.js';
 
 // A real-shaped facts bundle (what property.js returns) for a Hornsby lot
+const HORNSBY = COUNCILS.find((c) => c.key === 'hornsby');
+const TOOLS = tools(HORNSBY);
+const SYSTEM_PROMPT = systemPrompt(HORNSBY);
+
 const FACTS = {
 	address: '16 DURAL STREET HORNSBY', site_oid: 987654321, point: { lon: 151.09, lat: -33.7 },
 	lot: 'Lot 5 DP 12345', lot_area_m2: 1010.1, lga: 'HORNSBY', council: 'HORNSBY SHIRE COUNCIL',
@@ -62,7 +67,7 @@ describe('scope: the property is decided by the server, never by the model', () 
 		const r = await answerQuestion({ facts: { ...FACTS, lga: 'CESSNOCK', address: '15 ELLALONG STREET PELAW MAIN' }, question: 'Can I build?' }, deps(ai));
 		expect(ai.calls).toHaveLength(0);
 		expect(r.skippedModel).toBe(true);
-		expect(r.answer).toMatch(/only applies in Hornsby/);
+		expect(r.answer).toMatch(/DCPs indexed here are the Hornsby Development Control Plan 2024 and the Randwick Development Control Plan/);
 		expect(r.answer).toMatch(/CESSNOCK/);
 	});
 
@@ -240,7 +245,7 @@ describe('the search tool loop', () => {
 		for (const c of ai.calls) {
 			expect(c.model).toBe('test-model');
 			expect(c.instructions).toBe(SYSTEM_PROMPT);
-			expect(c.tools).toBe(TOOLS);
+			expect(c.tools).toEqual(TOOLS);
 		}
 	});
 });
@@ -262,7 +267,8 @@ describe('citedPageNumbers', () => {
 		['p. 17, and on page 33', [17, 33]],
 		['PDF pages 37, 111 & 209', [37, 111, 209]],
 		['no citations here', []],
-		['clause 1.2.6.1 sets it', []] // a clause number is not a page number
+		['clause 1.2.6.1 sets it', []], // a clause number is not a page number
+		['PDF page 1528', [1528]] // Randwick has four-digit page numbers
 	])('%s', (text, pages) => expect([...citedPageNumbers(text)].sort((a, b) => a - b)).toEqual(pages));
 });
 
@@ -392,5 +398,40 @@ describe('marked DCP maps: the property drawn as a dot on calibrated map pages',
 	it('the system prompt tells the model how to read a marked map', () => {
 		expect(SYSTEM_PROMPT).toMatch(/MAGENTA DOT/);
 		expect(SYSTEM_PROMPT).toMatch(/on or very close to a boundary/);
+	});
+});
+
+describe('more than one council: the DCP follows the property', () => {
+	const RANDWICK_FACTS = { ...FACTS, address: '10 MARINE PARADE MAROUBRA', lga: 'RANDWICK', zone: 'R2', zone_name: 'Low Density Residential', not_covered: ['flood'], flood: null };
+
+	it('a Randwick property gets the Randwick DCP: prompt, tool, search filter, and page labels', async () => {
+		const ai = fakeOpenAI(toolResp('site coverage dwelling house'), finalResp('done'));
+		const seen = [];
+		const search = async (q, opts) => (seen.push(opts), { pages: [{ page: 1201, score: 0.6, chunk: 0 }], belowFloor: false, best: 0.6 });
+		const loads = [];
+		const loadImage = async (page, opts) => (loads.push([page, opts.council]), { mime: 'image/png', base64: 'X' });
+		let mapCouncil;
+		const r = await answerQuestion({ facts: RANDWICK_FACTS, question: 'site coverage?' }, deps(ai, search, { loadImage, areaMaps: (f, c) => ((mapCouncil = c), []) }));
+		expect(ai.calls[0].instructions).toMatch(/^You are a planning-rules assistant for the Randwick Development Control Plan \(Randwick City Council/);
+		expect(ai.calls[0].tools[0].description).toMatch(/Randwick Development Control Plan/);
+		expect(seen[0].council).toBe('randwick');
+		expect(loads).toEqual([[1201, 'randwick']]);
+		expect(mapCouncil).toBe('randwick');
+		const imgMsg = ai.calls[1].input.find((i) => i.role === 'user');
+		expect(imgMsg.content[0].text).toBe('PDF page 1201 of the Randwick Development Control Plan:');
+		expect(r.council).toBe('randwick');
+		expect(r.warnings).toEqual([]);
+	});
+
+	it('a Hornsby property still gets the Hornsby DCP and council key', async () => {
+		const ai = fakeOpenAI(finalResp('ok'));
+		const r = await answerQuestion({ facts: FACTS, question: 'q' }, deps(ai));
+		expect(ai.calls[0].instructions).toBe(SYSTEM_PROMPT);
+		expect(r.council).toBe('hornsby');
+	});
+
+	it('each council has a distinct key, LGA and page count', () => {
+		expect(new Set(COUNCILS.map((c) => c.key)).size).toBe(COUNCILS.length);
+		expect(COUNCILS.find((c) => c.key === 'randwick')).toMatchObject({ lga: 'RANDWICK', pages: 1528 });
 	});
 });

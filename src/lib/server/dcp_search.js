@@ -20,9 +20,10 @@ export const DEFAULTS = {
 	floor: 0.4,
 	chunksToFetch: 12,
 	topPages: 4,
-	pagesDir: 'data/hornsby/pages',
+	/** Page images are data/<council>/pages/pNNNN.png locally and /pages/<council>/pNNNN.png on the search server. */
+	council: 'hornsby',
 	/**
-	 * 'fs' (default): loadPageImage reads pagesDir off local disk - true for the CLI scripts and
+	 * 'fs' (default): loadPageImage reads data/<council>/pages off local disk - true for the CLI scripts and
 	 * for local dev, where the SvelteKit server and the rendered PNGs are on the same machine.
 	 * 'http': fetch `${url}/pages/pNNNN.png` from the PixelRAG server instead. Needed in production:
 	 * a Vercel function has no local copy of the 250 MB of page images, only the deployed Fly
@@ -36,6 +37,13 @@ export function pageOf(hit) {
 	const m = /p(\d+)\.png/i.exec(hit?.url ?? hit?.path ?? '');
 	return m ? Number(m[1]) : null;
 }
+
+/**
+ * The index is an IVF index: vectors are grouped into clusters and a search normally checks only some of them (the
+ * combined index has 202 clusters and defaults to checking 128). With about 8,000 vectors checking every cluster costs
+ * a few milliseconds, so search them all and never miss a page for that reason.
+ */
+const SEARCH_ALL_CLUSTERS = 1024;
 
 const defaultSleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -69,13 +77,13 @@ export async function fetchWithRetry(doFetch, url, init, sleep = defaultSleep) {
  * @returns {Promise<{ pages: { page: number, score: number, chunk: number }[], belowFloor: boolean, best: number|null }>}
  */
 export async function searchPages(query, opts = {}) {
-	const { url, floor, chunksToFetch, topPages } = { ...DEFAULTS, ...opts };
+	const { url, floor, chunksToFetch, topPages, council } = { ...DEFAULTS, ...opts };
 	const doFetch = opts.fetch ?? fetch;
 
 	const res = await fetchWithRetry(
 		doFetch,
 		`${url}/search`,
-		{ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ queries: [{ text: query }], n_docs: chunksToFetch }) },
+		{ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ queries: [{ text: query }], n_docs: chunksToFetch, department: council, nprobe: SEARCH_ALL_CLUSTERS }) },
 		opts.sleep
 	);
 	if (!res.ok) throw new Error(`PixelRAG search failed: HTTP ${res.status}`);
@@ -94,17 +102,17 @@ export async function searchPages(query, opts = {}) {
 
 /** @returns {Promise<{ mime: string, base64: string }>} */
 export async function loadPageImage(page, opts = {}) {
-	const { pagesDir, pagesSource, url } = { ...DEFAULTS, ...opts };
+	const { council, pagesSource, url } = { ...DEFAULTS, ...opts };
 	const name = `p${String(page).padStart(4, '0')}.png`;
 
 	if (pagesSource === 'http') {
 		const doFetch = opts.fetch ?? fetch;
-		const res = await fetchWithRetry(doFetch, `${url}/pages/${name}`, undefined, opts.sleep);
+		const res = await fetchWithRetry(doFetch, `${url}/pages/${council}/${name}`, undefined, opts.sleep);
 		if (!res.ok) throw new Error(`fetching page ${page} failed: HTTP ${res.status}`);
 		const bytes = Buffer.from(await res.arrayBuffer());
 		return { mime: res.headers.get('content-type') || 'image/png', base64: bytes.toString('base64') };
 	}
 
-	const file = join(pagesDir, name);
+	const file = join(opts.pagesDir ?? join('data', council, 'pages'), name);
 	return { mime: 'image/png', base64: (await readFile(file)).toString('base64') };
 }

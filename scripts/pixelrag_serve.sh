@@ -5,7 +5,7 @@
 # The query is embedded with the SAME model that built the index (base Qwen3-VL-Embedding-2B, no adapter): mixing
 # models between index and query would make the similarity scores meaningless.
 source "$HOME/dcp-venv/bin/activate"
-IDX="${1:-data/hornsby/index_sample}"
+IDX="${1:-data/index_combined}"
 exec pixelrag serve \
   --index-dir "$IDX" \
   --tiles-dir "$IDX/tiles" \

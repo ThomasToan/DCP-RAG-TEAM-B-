@@ -9,6 +9,9 @@ import registry from './dcp_maps.json' with { type: 'json' };
 
 export const MAPS = registry.maps;
 
+/** Every map calibrated so far is in the Hornsby DCP; a map entry may name another council. */
+const councilOf = (m) => m.council ?? 'hornsby';
+
 /** Maps sent with the first message for every property inside them: the ones that decide WHICH rules apply. */
 const AREA_MAPS = new Set(['heritage', 'mixed-use']);
 const AREA_MAP_IDS = new Set(['htc-parking-tiers', 'htc-precincts']);
@@ -38,18 +41,18 @@ export function placeOnMap(m, point) {
  * and a heritage map only when NSW data puts the property in one of that map's conservation areas (the picture then
  * shows the precinct and the boundary; for every other property it would add nothing).
  */
-export function areaMapsFor(facts) {
+export function areaMapsFor(facts, council = 'hornsby') {
 	const names = new Set((facts?.heritage_detail ?? []).map((d) => d.name).filter(Boolean));
-	return MAPS.filter(isAreaMap)
+	return MAPS.filter((m) => isAreaMap(m) && councilOf(m) === council)
 		.filter((m) => m.group !== 'heritage' || (m.fit?.nsw_areas ?? []).some((n) => names.has(n)))
 		.map((m) => placeOnMap(m, facts?.point))
 		.filter(Boolean);
 }
 
 /** The calibrated map on this PDF page that the property falls inside, if any (pages hold at most one calibrated map). */
-export function mapOnPage(page, point) {
+export function mapOnPage(page, point, council = 'hornsby') {
 	for (const m of MAPS) {
-		if (m.page !== page) continue;
+		if (m.page !== page || councilOf(m) !== council) continue;
 		const placed = placeOnMap(m, point);
 		if (placed) return placed;
 	}

@@ -1,13 +1,25 @@
 import { describe, it, expect, vi } from 'vitest';
 import { existsSync } from 'node:fs';
-import { GET } from '../src/routes/dcp-page/[page]/+server.js';
+import { GET } from '../src/routes/dcp-page/[council]/[page]/+server.js';
 
 const pagesExist = existsSync('data/hornsby/pages/p0001.png');
-const get = (page) => GET({ params: { page }, fetch: undefined });
+const get = (page, council = 'hornsby') => GET({ params: { council, page }, fetch: undefined });
 
-describe('GET /dcp-page/[page]: local disk mode (no PIXELRAG_URL)', () => {
+describe('GET /dcp-page/[council]/[page]: local disk mode (no PIXELRAG_URL)', () => {
 	it.each(['0', '-1', '490', '999999', '1.5', 'abc', '', '17; rm -rf', '../../.env'])('rejects %j with 404, never touching the filesystem', async (page) => {
 		await expect(get(page)).rejects.toMatchObject({ status: 404 });
+	});
+
+	it.each(['', 'HORNSBY', 'cessnock', '..', 'hornsby/..'])('rejects council %j with 404', async (council) => {
+		await expect(get('1', council)).rejects.toMatchObject({ status: 404 });
+	});
+
+	it('page limits are per council: Randwick has 1528 pages, Hornsby 489', async () => {
+		await expect(get('490', 'hornsby')).rejects.toMatchObject({ status: 404 });
+		await expect(get('1529', 'randwick')).rejects.toMatchObject({ status: 404 });
+		await get('1528', 'randwick').catch((e) => {
+			if (e.status !== 404 || existsSync('data/randwick/pages/p1528.png')) throw e;
+		});
 	});
 
 	it('accepts the boundary values 1 and 489', () => {
@@ -31,24 +43,24 @@ describe('GET /dcp-page/[page]: local disk mode (no PIXELRAG_URL)', () => {
 	}
 });
 
-describe('GET /dcp-page/[page]: proxy mode (PIXELRAG_URL set)', () => {
+describe('GET /dcp-page/[council]/[page]: proxy mode (PIXELRAG_URL set)', () => {
 	// $env/dynamic/private is mocked per-test here (not with a hoisted vi.mock), so the block above
 	// keeps using the real module while this block gets a controlled PIXELRAG_URL.
 	async function withProxyEnv() {
 		vi.resetModules();
 		vi.doMock('$env/dynamic/private', () => ({ env: { PIXELRAG_URL: 'https://dcp-hornsby-search.fly.dev' } }));
-		return import('../src/routes/dcp-page/[page]/+server.js');
+		return import('../src/routes/dcp-page/[council]/[page]/+server.js');
 	}
 
-	it('fetches from PIXELRAG_URL/pages/pNNNN.png, never reading local disk', async () => {
+	it('fetches from PIXELRAG_URL/pages/<council>/pNNNN.png, never reading local disk', async () => {
 		const { GET: proxyGET } = await withProxyEnv();
 		let requestedUrl;
 		const fetch = async (url) => {
 			requestedUrl = url;
 			return new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), { headers: { 'content-type': 'image/png' } });
 		};
-		const res = await proxyGET({ params: { page: '37' }, fetch });
-		expect(requestedUrl).toBe('https://dcp-hornsby-search.fly.dev/pages/p0037.png');
+		const res = await proxyGET({ params: { council: 'hornsby', page: '37' }, fetch });
+		expect(requestedUrl).toBe('https://dcp-hornsby-search.fly.dev/pages/hornsby/p0037.png');
 		expect(res.headers.get('content-type')).toBe('image/png');
 		expect(res.headers.get('cache-control')).toMatch(/immutable/);
 	});
@@ -56,13 +68,13 @@ describe('GET /dcp-page/[page]: proxy mode (PIXELRAG_URL set)', () => {
 	it('a bad page number is still rejected before any fetch, even in proxy mode', async () => {
 		const { GET: proxyGET } = await withProxyEnv();
 		const fetch = vi.fn();
-		await expect(proxyGET({ params: { page: '0' }, fetch })).rejects.toMatchObject({ status: 404 });
+		await expect(proxyGET({ params: { council: 'hornsby', page: '0' }, fetch })).rejects.toMatchObject({ status: 404 });
 		expect(fetch).not.toHaveBeenCalled();
 	});
 
 	it('a failed upstream fetch becomes a 404, not a crash', async () => {
 		const { GET: proxyGET } = await withProxyEnv();
 		const fetch = async () => new Response('not found', { status: 404 });
-		await expect(proxyGET({ params: { page: '37' }, fetch })).rejects.toMatchObject({ status: 404 });
+		await expect(proxyGET({ params: { council: 'hornsby', page: '37' }, fetch })).rejects.toMatchObject({ status: 404 });
 	});
 });

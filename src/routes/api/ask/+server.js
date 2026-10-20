@@ -70,6 +70,7 @@ export async function POST({ request }) {
 		facts: { address: facts.address, lot: facts.lot, lot_area_m2: facts.lot_area_m2, summary: describeFacts(facts), notes: facts.notes, sources: facts.sources },
 		answer: result.answer,
 		pages: result.pages,
+		council: result.council ?? null, // which DCP the pages are from: /dcp-page/<council>/<page>
 		warnings: result.warnings,
 		responseId: result.responseId,
 		skippedModel: result.skippedModel ?? false

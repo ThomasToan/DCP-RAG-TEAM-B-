@@ -273,3 +273,26 @@ scripts/          ask.js  eval_retrieval.js  pixelrag_sample.sh  pixelrag_serve.
 sql/              01_schema.sql   (dcp, dcp_page, property_facts)
 test/             unit tests + recorded ArcGIS fixtures
 ```
+
+## Second council: Randwick (task 3)
+
+The app is no longer Hornsby-only. `src/lib/server/councils.js` lists the indexed DCPs (Hornsby DCP 2024, 489 pages;
+Randwick DCP, 1,528 pages, Part A1 dated 27 July 2026); a property is matched to its DCP by the LGA from NSW data, and
+a property in any other council is refused before the model is called. Adding a council means: an entry in
+`councils.js`, its pages rendered into `data/<key>/pages`, and a rebuild of the combined index.
+
+- **One index for all councils.** `notebooks/combined_index_colab.ipynb` renders each PDF into its own folder
+  (`pages/hornsby`, `pages/randwick`) and builds one PixelRAG index from the parent folder. PixelRAG tags each page with
+  its folder as a "department", and every search sends `department: <council>`, so a Randwick question only ever sees
+  Randwick pages. One search server and one model in memory serve both councils.
+- **Page images** are `data/<council>/pages/pNNNN.png` locally, `/pages/<council>/pNNNN.png` on the Fly server, and
+  `/dcp-page/<council>/<page>` in the app (council and page number validated against `councils.js`).
+- **Maps** (task 2) are Hornsby only for now; a Randwick property never gets a Hornsby map.
+- NSW has no flood-planning data for Randwick, so flood is reported as NOT COVERED there.
+- **Built and checked.** The combined index (8,080 vectors: 489 Hornsby + 1,528 Randwick pages, 4 pieces each) took
+  58 minutes on a Colab T4. Searches set `nprobe` above the 202 IVF clusters so every cluster is checked. Hornsby
+  retrieval is unchanged by the rebuild (`node scripts/eval_retrieval.js`: right page first 7/11, top 5 11/11; nonsense
+  at most 0.351, real at least 0.446). Randwick, 12 questions whose right Part is known from the table of contents:
+  right Part first 8/12, top 3 11/12; nonsense at most 0.369, real at least 0.425, so the same 0.40 floor works. Live
+  answer through the full code: 10 Marine Parade, Maroubra (R2, 498.1 m2), site coverage 50%, PDF page 359, clause
+  2.4(a), checked against the page text.

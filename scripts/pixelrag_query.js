@@ -11,11 +11,12 @@ const N = Number(process.env.N ?? 12);
 
 const pageOf = (hit) => Number(/p(\d+)\.png/i.exec(hit.url ?? hit.path ?? '')?.[1] ?? NaN);
 
-export async function search(text, n = N) {
+// COUNCIL (default hornsby) limits the search to one council's pages in the combined index, as the app does.
+export async function search(text, n = N, council = process.env.COUNCIL ?? 'hornsby') {
 	const res = await fetch(`${BASE}/search`, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({ queries: [{ text }], n_docs: n })
+		body: JSON.stringify({ queries: [{ text }], n_docs: n, department: council, nprobe: 1024 })
 	});
 	if (!res.ok) throw new Error(`search failed: HTTP ${res.status} ${await res.text()}`);
 	const hits = (await res.json()).results[0].hits;

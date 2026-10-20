@@ -46,7 +46,7 @@
 				submittedAddress = body.facts.address;
 			}
 			previousResponseId = body.responseId;
-			messages = [...messages, { role: 'assistant', text: body.answer, pages: body.pages, warnings: body.warnings }];
+			messages = [...messages, { role: 'assistant', text: body.answer, pages: body.pages, council: body.council, warnings: body.warnings }];
 		} catch {
 			error = 'Could not reach the server. Check your connection and try again.';
 			messages = messages.slice(0, -1);
@@ -76,12 +76,12 @@
 </script>
 
 <svelte:head>
-	<title>Hornsby DCP assistant</title>
+	<title>DCP assistant</title>
 </svelte:head>
 
 <main>
-	<h1>Hornsby DCP assistant</h1>
-	<p class="sub">Ask what the Hornsby Development Control Plan 2024 says about a property. Answers cite the DCP page and clause; a Council planner makes the final call.</p>
+	<h1>DCP assistant</h1>
+	<p class="sub">Ask what the Development Control Plan says about a property in Hornsby or Randwick. Answers cite the DCP page and clause; a Council planner makes the final call.</p>
 
 	{#if !submittedAddress}
 		<section class="address-box">
@@ -127,7 +127,7 @@
 							<div class="pages">
 								{#each m.pages as p}
 									<figure>
-										<img src="/dcp-page/{p.page}" alt="DCP page {p.page}" loading="lazy" />
+										<img src="/dcp-page/{m.council}/{p.page}" alt="DCP page {p.page}" loading="lazy" />
 										<figcaption>page {p.page}</figcaption>
 									</figure>
 								{/each}

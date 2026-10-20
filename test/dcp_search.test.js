@@ -56,7 +56,7 @@ describe('searchPages', () => {
 		const f = async (url, init) => ((seen = { url, body: JSON.parse(init.body) }), new Response(JSON.stringify({ results: [{ hits: [] }] })));
 		await searchPages('tree removal', { fetch: f, url: 'http://x:1', chunksToFetch: 7 });
 		expect(seen.url).toBe('http://x:1/search');
-		expect(seen.body).toEqual({ queries: [{ text: 'tree removal' }], n_docs: 7 });
+		expect(seen.body).toEqual({ queries: [{ text: 'tree removal' }], n_docs: 7, department: 'hornsby', nprobe: 1024 }); // department: search only this council's pages
 	});
 
 	it('throws on an HTTP error rather than pretending nothing matched', async () => {
@@ -83,15 +83,22 @@ describe('loadPageImage', () => {
 	});
 
 	describe('pagesSource: "http" (production, no local copy of the pages)', () => {
-		it('fetches PIXELRAG_URL/pages/pNNNN.png instead of reading disk', async () => {
+		it('fetches PIXELRAG_URL/pages/<council>/pNNNN.png instead of reading disk', async () => {
 			let requestedUrl;
 			const fetch = async (url) => {
 				requestedUrl = url;
 				return new Response(new Uint8Array([1, 2, 3]), { headers: { 'content-type': 'image/png' } });
 			};
 			const img = await loadPageImage(37, { pagesSource: 'http', url: 'https://x.fly.dev', fetch });
-			expect(requestedUrl).toBe('https://x.fly.dev/pages/p0037.png');
+			expect(requestedUrl).toBe('https://x.fly.dev/pages/hornsby/p0037.png');
 			expect(img).toEqual({ mime: 'image/png', base64: Buffer.from([1, 2, 3]).toString('base64') });
+		});
+
+		it('uses the council folder it is given', async () => {
+			let requestedUrl;
+			const fetch = async (url) => ((requestedUrl = url), new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } }));
+			await loadPageImage(1201, { pagesSource: 'http', url: 'https://x.fly.dev', council: 'randwick', fetch });
+			expect(requestedUrl).toBe('https://x.fly.dev/pages/randwick/p1201.png');
 		});
 
 		it('throws on an HTTP error rather than returning a broken image', async () => {
